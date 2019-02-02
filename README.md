@@ -1,4 +1,4 @@
-# Grid plugin for Craft CMS 3.x
+# Grid plugin for Craft CMS 3.1.x [BETA]
 
 Content manage CSS Grid for matrix and other element-based fields.
 
@@ -7,7 +7,7 @@ Content manage CSS Grid for matrix and other element-based fields.
 ## Requirements
 
 This plugin requires Craft CMS 3.1.7 or later.
-A browser that support CSS Grid Layout and CSS Custom Properties. For more information on browser support, see Browser Support, below.
+A browser that support CSS Grid Layout and CSS Custom Properties. For more information on browser support, see [Browser Support](https://github.com/wbrowar/craft-grid#browser-support), below.
 
 > 🚧 During BETA, Grid is not intended for use on production. Data might change or get corrupted, so please use Grid in a test environment only.
 
@@ -33,13 +33,13 @@ Grid is a field that lets content editors lay out content connected through matr
 
 ### Target Field
 
-![Screenshot](resources/img/target-field.png)
-
 Grid fields must be paired up with an element-based field to work. In Grid, this is called the "target field".
 
 When setting up a Grid field a drop down field selects the target field from a list of supported field types, so it is best to create the target field before creating a Grid field.
 
-**Once a Grid field is used and there is data stored in the CMS, it‘s important that the target field is not changed. Changing the target field will result in lost or corrupt Grid data.**
+<img src="resources/img/target-field.png" width="300">
+
+*Once a Grid field is used and there is data stored in the CMS, it‘s important that the target field is not changed. Changing the target field will result in lost or corrupt Grid data.*
 
 ### Supported Field Types
 
@@ -63,7 +63,7 @@ When adding a layout, the breakpoint‘s `min-width` value is required. This is 
 
 Columns and rows can be configured to a fixed layout or they can give editors the ability to add or remove columns and rows as needed. When you change the mode of a column or row, you‘ll see the fields that define the grid will change.
 
-![Screenshot](resources/img/column-row-mode.png)
+<img src="resources/img/column-row-mode.png" width="300">
 
 ##### Auto Mode
 
