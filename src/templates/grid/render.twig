@@ -1,0 +1,156 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+ ┌────────────────────────────────────────────────────────┐
+ │                    block aboveGrid                     │
+ └────────────────────────────────────────────────────────┘
+ ┌────────────────────────────────────────────────────────┐
+ │                        <grid>                          │
+ │ ┌────────────────────────────────────────────────────┐ │
+ │ │                 block beforeItems                  │ │
+ │ └────────────────────────────────────────────────────┘ │
+ │ ┌────────────────────────────────────────────────────┐ │
+ │ │                      <item>                        │ │
+ │ │ ┌────────────────────────────────────────────────┐ │ │
+ │ │ │                  block items                   │ │ │
+ │ │ └────────────────────────────────────────────────┘ │ │
+ │ └────────────────────────────────────────────────────┘ │
+ │ ┌────────────────────────────────────────────────────┐ │
+ │ │                  block afterItems                  │ │
+ │ └────────────────────────────────────────────────────┘ │
+ └────────────────────────────────────────────────────────┘
+ ┌────────────────────────────────────────────────────────┐
+ │                    block belowGrid                     │
+ └────────────────────────────────────────────────────────┘
+ #}
+
+{% import _self as self %}
+
+{% set attributes = attributes ?? null %}
+{% set class = class ?? null %}
+{% set preview = preview ?? false %}
+
+{% if (grid ?? false) and (target ?? false) %}
+    {# Set variables for later #}
+    {% set gridCss = '' %}
+
+    {# Get grid information #}
+    {% set gridHandle = grid.field.handle %}
+
+    {# Get target information #}
+    {% set targetField = field ?? craft.app.fields.getFieldById(grid.target.id) %}
+    {% set targetHandle = targetField.handle %}
+
+    {% set gridSelector = 'grid__' ~ gridHandle|snake ~ '__' ~ targetHandle|snake %}
+
+    {# Render grid markup #}
+    {% block aboveGrid %}{% endblock %}
+    <div class="grid__{{ gridHandle|snake }}__{{ targetHandle|snake }}{% if class ?? false %} {{ class }}{% endif %}"{% if attributes ?? false %} {{ attributes|raw }}{% endif %}>
+        {% block beforeItems %}{% endblock %}
+        {% for item in target %}
+            {# Render items #}
+            {% set targetItemClass = gridSelector ~ '__item' %}
+
+            <div class="{{ targetItemClass }} {{ targetItemClass ~ '--' ~ loop.index }}{% if preview %} {{ gridSelector }}__preview{% endif %}">
+                {% if preview %}
+                    <span>{{ (item.type ?? false) ? item.type.name : null ?? item.title ?? 'Item' }}</span>
+                {% else %}
+                    {% block items %}{% endblock %}
+                {% endif %}
+            </div>
+        {% endfor %}
+        {% block afterItems %}{% endblock %}
+    </div>
+    {% block belowGrid %}{% endblock %}
+    {#<pre style="white-space: pre">#}
+        {#{{ dump(grid) }}#}
+    {#</pre>#}
+
+    {# Set CSS #}
+    {% for breakpoint in grid.field.layout.breakpoints %}
+        {% set minWidth = breakpoint.minWidth %}
+        {% set maxWidth = not loop.last ? grid.field.layout.breakpoints[loop.index].minWidth - 1 : null %}
+        {% set newCss -%}
+            @supports (--custom:property) {
+            {% if minWidth == 0 -%}
+                .{{ gridSelector }} {
+                    display: grid;
+                    {{ self.gridFromBreakpoint(breakpoint) }}
+                }
+                {% if preview %}
+                    .{{ gridSelector }}__preview {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100%;
+                        border: 1px dashed rgba(0, 0, 0, .3);
+                    }
+                    {% for index in 1..target|length %}
+                        .{{ gridSelector }}__preview:nth-child({{ index }}) {
+                            background-color: hsl({{ index * 15 }}, 100%, 32%);
+                            background-color: hsla({{ index * 15 }}, 100%, 46%, .7);
+                        }
+                    {% endfor %}
+                {% endif %}
+                {% if maxWidth ?? false -%}
+                    @media (max-width: {{ maxWidth }}px) {
+                {%- endif %}
+                {% if breakpoint.cssGrid ?? false -%}
+                    {{ self.cssFromCssGrid(breakpoint.cssGrid, gridSelector) }}
+                {%- endif %}
+            {%- else %}
+                @media (min-width: {{ minWidth }}px){% if maxWidth ?? false %} and (max-width: {{ maxWidth }}px){% endif %} {
+                    .{{ gridSelector }} {
+                        {{ self.gridFromBreakpoint(breakpoint) }}
+                    }
+                {% if breakpoint.cssGrid ?? false %}
+                    {{ self.cssFromCssGrid(breakpoint.cssGrid, gridSelector) }}
+                {% endif %}
+            {% endif %}
+
+            {% for item in target %}
+                {% if grid.value['id' ~ minWidth]['id' ~ item.id] ?? false %}
+                    {% set itemLayout = grid.value['id' ~ minWidth]['id' ~ item.id] %}
+                    {% set targetItemClass = gridSelector ~ '__item--' ~ loop.index %}
+
+                    .{{ targetItemClass }} {
+                        grid-column: {{ itemLayout.columnStart }} / {{ itemLayout.columnEnd }};
+                        grid-row: {{ itemLayout.rowStart }} / {{ itemLayout.rowEnd }};
+                    }
+                {% endif %}
+            {% endfor %}
+
+            {% if minWidth > 0 or maxWidth %}
+                }
+            {% endif %}
+            }
+        {%- endset %}
+
+        {% set gridCss = gridCss ~ newCss %}
+    {% endfor %}
+
+    {% css gridCss|raw %}
+{% elseif craft.app.config.general.devMode %}
+    <p>A grid field was not found.</p>
+{% endif %}
+
+{% macro cssFromCssGrid(cssGrid, gridSelector) %}
+    {{ cssGrid|replace({
+        '[grid]': '.' ~ gridSelector,
+        '[item]': '.' ~ gridSelector ~ '__item',
+    }) }}
+{% endmacro %}
+
+{% macro gridFromBreakpoint(breakpoint) -%}
+    {% switch breakpoint.modeColumns -%}
+        {% case 'auto' %}
+            grid-auto-columns: {{ breakpoint.autoColumns }};
+        {% case 'fixed' %}
+            grid-template-columns: {{ breakpoint.columns|join(' ') }};
+    {%- endswitch %}
+    {% switch breakpoint.modeRows -%}
+        {% case 'auto' %}
+            grid-auto-rows: {{ breakpoint.autoRows }};
+        {% case 'fixed' %}
+            grid-template-rows: {{ breakpoint.rows|join(' ') }};
+    {%- endswitch %}
+{%- endmacro %}

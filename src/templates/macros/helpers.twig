@@ -1,0 +1,23 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+
+{% macro vueTextField(config = {}) %}
+    <div class="field">
+        <div class="heading">
+            {% if config.label ?? '' %}
+                <label>{{ config.label }}</label>
+            {% endif %}
+            {% if config.instructions ?? '' %}
+                <div class="instructions">
+                    {{ config.instructions|markdown }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="input ltr">
+            {% if config.textarea ?? false %}
+                <textarea cols="30" rows="{{ config.textareaRows ?? 3 }}" autocomplete="off" class="text fullwidth"{% if config.placeholder ?? false %} placeholder="{{ config.placeholder }}"{% endif %}{% if config.inputAttr ?? false %} {{ config.inputAttr|raw }}{% endif %}></textarea>
+            {% else %}
+                <input type="text" autocomplete="off" class="text fullwidth"{% if config.placeholder ?? false %} placeholder="{{ config.placeholder }}"{% endif %}{% if config.inputAttr ?? false %} {{ config.inputAttr|raw }}{% endif %}>
+            {% endif %}
+        </div>
+    </div>
+{% endmacro %}

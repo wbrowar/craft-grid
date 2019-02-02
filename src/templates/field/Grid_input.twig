@@ -1,0 +1,58 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Grid plugin for Craft CMS 3.x
+ *
+ * Grid Field Input
+ *
+ * @author    Will Browar
+ * @copyright Copyright (c) 2018 Will Browar
+ * @link      http://wbrowar.com
+ * @package   Grid
+ * @since     1.0.0
+ */
+#}
+
+{#{% import "_includes/forms" as forms %}#}
+{% import "grid/macros/helpers.twig" as helpers %}
+
+<div class="grid__input">
+    <div class="grid__input__header">
+        <div class="grid__input__select" v-cloak>
+            <div class="grid__input__select__item" :class="[{ 'grid__input__select__item--selected': currentSelection === breakpoint.minWidth }, 'grid__input__select__item--' + breakpoint.icon, 'grid__input__select__item--' + breakpoint.minWidth, 'icon_' + breakpoint.icon]" @click="currentSelection = breakpoint.minWidth" v-for="(breakpoint, index) in field.layout.breakpoints" v-cloak>
+                <span>${ breakpoint.minWidth }</span>
+            </div>
+        </div>
+    </div>
+    <div class="grid__input__instructions" v-cloak>
+        <div v-if="currentAction === 'settingTargetItemStart'">{{ 'Click on a grid cell to begin layout.'|t('grid') }}</div>
+        <div v-else-if="currentAction === 'settingTargetItemEnd'">{{ 'Click on a grid cell to end layout.'|t('grid') }}</div>
+        <div v-else>{{ 'Select a title to lay out.'|t('grid') }}</div>
+    </div>
+    <div class="grid__input__breakpoints" v-cloak>
+        <div class="grid__input__breakpoint" :class="{ 'grid__input__breakpoint--before': currentSelection > breakpoint.minWidth, 'grid__input__breakpoint--after': currentSelection < breakpoint.minWidth }" v-for="breakpoint in field.layout.breakpoints" v-cloak>
+            <div class="grid__input__target_items">
+                <div><b v-text="target.name"></b></div>
+                <div class="grid__input__target_item" v-for="item in target.items" v-if="item.status === 'enabled'" v-cloak>
+                    <div class="grid__input__target_item__complete"><span v-if="targetItemDataIsSet(breakpoint, item, true)" title="{{ 'Item has been laid out'|t('grid') }}"><b>✓</b></span></div>
+                    <div class="grid__input__target_item__remove"><span class="delete icon" title="{{ 'Remove from grid'|t('grid') }}" @click="removeTargetItemData(breakpoint, item)" v-if="targetItemDataIsSet(breakpoint, item)"></span><span @click="setTargetItemData(breakpoint, item)" class="add icon light" v-else></span></div>
+                    <div class="grid__input__target_item__label" @click="setTargetItemData(breakpoint, item)" :title="item.title"><span>${ item.title }</span></div>
+                </div>
+            </div>
+            <div class="grid__input__target_preview grid__preview" :class="{ 'grid__preview--auto_columns': breakpoint.modeColumns === 'auto', 'grid__preview--auto_rows': breakpoint.modeRows === 'auto' }">
+                <div class="grid__preview__grid grid__preview__grid--layout" :style="stylePreviewGrid(breakpoint)">
+                    <div class="grid__preview__item" v-for="item in breakpoint.preview.items"></div>
+                </div>
+                <div class="grid__preview__grid grid__preview__grid--items" :style="stylePreviewGrid(breakpoint)">
+                    <div v-for="item in fieldValue['id'+breakpoint.minWidth]" :style="{ gridColumnStart: item.columnStart, gridColumnEnd: item.columnEnd, gridRowStart: item.rowStart, gridRowEnd: item.rowEnd }" v-if="" v-cloak>${ item.title }</div>
+                </div>
+                <div class="grid__preview__grid grid__preview__grid--controls" :class="{ 'grid__preview__grid--controls--rollover': ['settingTargetItemStart', 'settingTargetItemEnd'].indexOf(currentAction) > -1 }" :style="stylePreviewGrid(breakpoint)">
+                    <div class="grid__preview__item" v-for="item in breakpoint.preview.items" @click="onPreviewItemClicked(breakpoint.minWidth, item)" @mouseover="onPreviewItemMouseOver(breakpoint.minWidth, item)"></div>
+                </div>
+                <div class="grid__preview__add grid__preview__add--column" @click="addAutoColumn(breakpoint)" v-if="breakpoint.modeColumns === 'auto'">+ column</div>
+                <div class="grid__preview__add grid__preview__add--row" @click="addAutoRow(breakpoint)" v-if="breakpoint.modeRows === 'auto'">+ row</div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" name="{{ name }}" v-model="fieldDataJson">
+</div>
