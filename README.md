@@ -29,6 +29,10 @@ To install the plugin, you can find it in the [Craft Plugin Store](https://plugi
 
 Grid is a field that lets content editors lay out content connected through matrix and other relation fields (entries, assets, etc...). Grid lets you define CSS grid rules for different layout breakpoints and lets editors optimize content layout for different screen sizes.
 
+Grid creates HTML and CSS that is used on the front-end of your site. 
+
+---
+
 ## Configuring Grid
 
 ### Target Field
@@ -59,6 +63,8 @@ Grid‘s CSS code is generated mobile first, so the first grid layout is meant f
 
 When adding a layout, the breakpoint‘s `min-width` value is required. This is set as a number in pixel units. Grid layouts are sorted from smallest to largest breakpoint `min-width` value.
 
+---
+
 #### Columns and Rows
 
 Columns and rows can be configured to a fixed layout or they can give editors the ability to add or remove columns and rows as needed. When you change the mode of a column or row, you‘ll see the fields that define the grid will change.
@@ -81,6 +87,8 @@ You can use valid sizing units—such as `fr`, `px`, `%`, `em`, or `rem`—and y
 
 *Row Mode works the same way for fixed row layouts.*
 
+---
+
 ## Using the Grid Field
 
 ![Screenshot](resources/img/live-preview-med.png)
@@ -93,6 +101,7 @@ When a piece of content has been laid onto the grid, a check mark will appear ne
 
 *TIP: Because CSS Grid allows it, you can overlap items in your layout. The order of the items in the target field determines which items are in the front and which are in the back.*
 
+---
 
 ### Adding Grid to a Twig Template
 
@@ -135,8 +144,12 @@ Here's an example of a matrix field that is processed inside of the `griditem` b
 {% endgrid %}
 ```
 
+---
+
 #### Advanced Twig Options
 The `grid` block and `griditem` block accept more arguments and configuration when needed.
+
+---
 
 ##### Target Array
 
@@ -151,6 +164,8 @@ To specify your target field or to use eager loading for your target field, add 
 In this example, `entry.relatedEntries` is specified and eager loading is used to get a `featuredImage` asset.
 
 *NOTE: This must be in the form of an array, so it‘s important that you use `.all()` when passing in element criteria.*
+
+---
 
 ##### Modify the Grid Container
 
@@ -168,6 +183,8 @@ By default, the `grid` block is turned into a `<div>` tag with predefined classe
 | `classes` | `''` | Adds classes into the element‘s `class` attribute. This can by helpful for styling the grid container and its child items. |
 | `element` | `'div'` | Change the element for more semantic HTML or for better accessibility. |
 | `preview` | `false` | Setting this to `true` adds simple styling to let you preview your content in your grid layout. This is meant to be used for early development and may not work with content that is already styled. |
+
+---
 
 ##### Modify Grid Items
 
@@ -188,6 +205,8 @@ The `griditem` block creates a `<div>` tag for each grid item. A configuration o
 | `attributes` | `''` | Add in any valid HTML attribute, `data-` attributes, Vue directives, etc... |
 | `classes` | `''` | Adds classes into the element‘s `class` attribute. |
 | `element` | `'div'` | Change the element for more semantic HTML or for better accessibility. |
+
+---
 
 ### Browser Support
 
