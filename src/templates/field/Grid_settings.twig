@@ -50,7 +50,7 @@
     options: fieldOptions,
     value: field['targetFieldId']}) }}
 
-<div class="field">
+<div class="field" data-grid-field="{{ fieldId }}" :data-has-loaded="hasLoaded">
     <div class="heading">
         <label>{{ 'Layout'|t('grid') }}</label>
         <div class="instructions">
@@ -61,17 +61,14 @@
         <div class="grid__settings__breakpoint" v-for="(breakpoint, index) in layout.breakpoints" v-cloak>
             <div class="grid__settings__header">
                 <div class="grid__settings__min_width">
-                    <div class="grid__settings__min_width__field" v-if="breakpoint.minWidth && breakpoint.minWidth > 0">
+                    <div class="grid__settings__min_width__field" v-if="breakpoint.prevMinWidth > 0">
                         {{ helpers.vueTextField({
-                            inputAttr: 'v-model.number.trim="breakpoint.minWidth"',
+                            inputAttr: '@blur="validateMinWidth(breakpoint)" v-model.number.trim="breakpoint.minWidth"',
                             instructions: '(min-width)',
                             label: 'Breakpoint'|t('grid'),
                             placeholder: '1024',
                         }) }}
                     </div>
-                    {#<div v-else>#}
-                        {#No breakpoint.#}
-                    {#</div>#}
                 </div>
                 <div class="grid__settings__icon">
                     <div class="field">
@@ -91,7 +88,7 @@
                     </div>
                 </div>
                 <div class="grid__settings__breakpoint_actions">
-                    <div class="btn delete icon" @click="removeBreakpoint(index)" v-if="breakpoint.minWidth > 0">{{ 'Remove'|t('grid') }}</div>
+                    <div class="btn delete icon" @click="removeBreakpoint(index)" v-if="breakpoint.prevMinWidth > 0">{{ 'Remove'|t('grid') }}</div>
                 </div>
             </div>
             <div class="grid__settings__layout">

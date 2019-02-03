@@ -33,10 +33,10 @@
         <div class="grid__input__breakpoint" :class="{ 'grid__input__breakpoint--before': currentSelection > breakpoint.minWidth, 'grid__input__breakpoint--after': currentSelection < breakpoint.minWidth }" v-for="breakpoint in field.layout.breakpoints" v-cloak>
             <div class="grid__input__target_items">
                 <div><b v-text="target.name"></b></div>
-                <div class="grid__input__target_item" v-for="item in target.items" v-if="item.status === 'enabled'" v-cloak>
+                <div class="grid__input__target_item" v-for="(item, index) in target.items" v-if="item.status === 'enabled'" v-cloak>
                     <div class="grid__input__target_item__complete"><span v-if="targetItemDataIsSet(breakpoint, item, true)" title="{{ 'Item has been laid out'|t('grid') }}"><b>✓</b></span></div>
                     <div class="grid__input__target_item__remove"><span class="delete icon" title="{{ 'Remove from grid'|t('grid') }}" @click="removeTargetItemData(breakpoint, item)" v-if="targetItemDataIsSet(breakpoint, item)"></span><span @click="setTargetItemData(breakpoint, item)" class="add icon light" v-else></span></div>
-                    <div class="grid__input__target_item__label" @click="setTargetItemData(breakpoint, item)" :title="item.title"><span>${ item.title }</span></div>
+                    <div class="grid__input__target_item__label" @click="setTargetItemData(breakpoint, item)" :title="item.title"><span><span>${ item.title }</span></span></div>
                 </div>
             </div>
             <div class="grid__input__target_preview grid__preview" :class="{ 'grid__preview--auto_columns': breakpoint.modeColumns === 'auto', 'grid__preview--auto_rows': breakpoint.modeRows === 'auto' }">
@@ -44,7 +44,7 @@
                     <div class="grid__preview__item" v-for="item in breakpoint.preview.items"></div>
                 </div>
                 <div class="grid__preview__grid grid__preview__grid--items" :style="stylePreviewGrid(breakpoint)">
-                    <div v-for="item in fieldValue['id'+breakpoint.minWidth]" :style="{ gridColumnStart: item.columnStart, gridColumnEnd: item.columnEnd, gridRowStart: item.rowStart, gridRowEnd: item.rowEnd }" v-cloak>${ item.title }</div>
+                    <div v-for="(item, key, index) in fieldValue['id'+breakpoint.minWidth]" :style="{ gridColumnStart: item.columnStart, gridColumnEnd: item.columnEnd, gridRowStart: item.rowStart, gridRowEnd: item.rowEnd }" v-cloak><span>${ item.title }</span></div>
                 </div>
                 <div class="grid__preview__grid grid__preview__grid--controls" :class="{ 'grid__preview__grid--controls--rollover': ['settingTargetItemStart', 'settingTargetItemEnd'].indexOf(currentAction) > -1 }" :style="stylePreviewGrid(breakpoint)">
                     <div class="grid__preview__item" v-for="item in breakpoint.preview.items" @click="onPreviewItemClicked(breakpoint.minWidth, item)" @mouseover="onPreviewItemMouseOver(breakpoint.minWidth, item)"></div>

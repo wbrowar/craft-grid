@@ -10,6 +10,7 @@
 
 namespace wbrowar\grid\services;
 
+use craft\helpers\Json;
 use craft\helpers\StringHelper;
 
 use Craft;
@@ -236,6 +237,36 @@ class GridService extends Component
         unset($this->_render['parent']);
 
         return '</' . $element . '>';
+    }
+
+    /*
+     * @return bool
+     */
+    public function resaveElementForNewMinWidths($elementId, $fieldHandle, $newMinWidths)
+    {
+        $element = Craft::$app->getElements()->getElementById($elementId);
+        $fieldValue = $element->getFieldValue($fieldHandle);
+        $saveElement = false;
+
+        if ($fieldValue['value'] ?? false) {
+            foreach ($newMinWidths as $widthMap) {
+                if ($fieldValue['value']['id' . $widthMap['old']] ?? false) {
+                    $fieldValue['value']['id' . $widthMap['new']] = $fieldValue['value']['id' . $widthMap['old']];
+                    unset($fieldValue['value']['id' . $widthMap['old']]);
+                    $saveElement = true;
+                }
+            }
+        }
+
+        if ($saveElement) {
+            $updatedGridFields = [$fieldHandle => Json::encode($fieldValue)];
+            $element->setFieldValues($updatedGridFields);
+            $saved = Craft::$app->getElements()->saveElement($element);
+
+            return $saved;
+        }
+
+        return false;
     }
 
     /*

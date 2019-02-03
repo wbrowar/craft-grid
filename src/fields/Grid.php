@@ -10,6 +10,10 @@
 
 namespace wbrowar\grid\fields;
 
+use craft\base\Element;
+use craft\db\Query;
+use craft\helpers\ElementHelper;
+use craft\models\FieldLayout;
 use wbrowar\grid\assetbundles\grid\GridAsset;
 use wbrowar\grid\Grid as GridPlugin;
 use wbrowar\grid\assetbundles\gridfield\GridFieldAsset;
@@ -18,6 +22,7 @@ use Craft;
 use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\helpers\Db;
+use wbrowar\grid\jobs\ResaveElements;
 use yii\db\Schema;
 use craft\helpers\Json;
 
@@ -82,10 +87,17 @@ class Grid extends Field
         $fieldHandle = $this->handle;
         $fieldValue = $element->getFieldValue($fieldHandle);
 
+        // Resave fields that use newX when adding content
         if ($fieldValue['target'] ?? false) {
             $targetFieldId = $fieldValue['target']['id'];
             $targetField = Craft::$app->getFields()->getFieldById($targetFieldId);
-            $targetValue = $element->getFieldValue($targetField->handle);
+            if ($element['ownerId'] ?? false) {
+                $targetElement = Craft::$app->getElements()->getElementById($element['ownerId']);
+            } else {
+                $targetElement = $element;
+            }
+
+            $targetValue = $targetElement->getFieldValue($targetField->handle);
 
             switch ($targetValue->elementType) {
                 case 'craft\\elements\\MatrixBlock':
@@ -147,6 +159,56 @@ class Grid extends Field
     /**
      * @inheritdoc
      */
+    public function afterSave(bool $isNew)
+    {
+
+        // Check for updated breakpoints
+        $layout = Json::decodeIfJson($this->layout);
+        $newMinWidths = [];
+        foreach ($layout['breakpoints'] as $breakpoint) {
+            if ($breakpoint['prevMinWidth'] !== $breakpoint['minWidth']) {
+                $newMinWidths[] = [
+                    'old' => $breakpoint['prevMinWidth'],
+                    'new' => $breakpoint['minWidth'],
+                ];
+            }
+        }
+        // Update all elements that have field
+        if (count($newMinWidths) > 0) {
+            // Get layouts that include this field
+            $layoutIds = (new Query())
+                ->select(['layoutId'])
+                ->from(['{{%fieldlayoutfields}}'])
+                ->where('fieldId=:id', [':id' => $this->id])
+                ->orderBy('layoutId ASC')
+                ->column();
+
+            foreach ($layoutIds as $layoutId) {
+                $elements = (new Query())
+                    ->select(['id'])
+                    ->from('{{%elements}}')
+                    ->where('fieldLayoutId=:layoutId', [':layoutId' => $layoutId])
+                    ->column();
+
+                foreach ($elements as $elementId) {
+                    \wbrowar\grid\Grid::$plugin->grid->resaveElementForNewMinWidths($elementId, $this->handle, $newMinWidths);
+//                    Craft::$app->getQueue()->push(new ResaveElements([
+//                        'description' => Craft::t('grid', 'Resaving element with id: ' . $elementId),
+//                        'elementId' => $elementId,
+//                        'fieldHandle' => $this->handle,
+//                        'newMinWidths' => $newMinWidths,
+//                    ]));
+                }
+            }
+        }
+//        Craft::dd($newMinWidths);
+
+        parent::afterSave($isNew);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getContentColumnType(): string
     {
         return Schema::TYPE_TEXT;
@@ -193,17 +255,21 @@ class Grid extends Field
         // Register our asset bundle
         Craft::$app->getView()->registerAssetBundle(GridAsset::class);
 
+        $fieldId = date('U');
+
         $jsonVars = [
+            'fieldId' => $fieldId,
             'layout' => Json::decodeIfJson($this->layout),
         ];
         $jsonVars = Json::encode($jsonVars);
-        Craft::$app->getView()->registerJs("$('#wbrowar-grid-fields-Grid').GridFieldSettings(" . $jsonVars . ");");
+        Craft::$app->getView()->registerJs("$('[data-grid-field=\"" . $fieldId . "\"]').GridFieldSettings(" . $jsonVars . ");");
 
         // Render the settings template
         return Craft::$app->getView()->renderTemplate(
             'grid/field/Grid_settings',
             [
                 'field' => $this,
+                'fieldId' => $fieldId,
             ]
         );
     }

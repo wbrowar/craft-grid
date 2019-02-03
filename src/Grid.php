@@ -86,14 +86,6 @@ class Grid extends Plugin
         );
 
         Event::on(
-            View::class,
-            View::EVENT_REGISTER_SITE_TEMPLATE_ROOTS,
-            function(RegisterTemplateRootsEvent $event) {
-                $event->roots['grid'] = __DIR__ . '/templates/grid';
-            }
-        );
-
-        Event::on(
             CraftVariable::class,
             CraftVariable::EVENT_INIT,
             function (Event $event) {
@@ -102,21 +94,6 @@ class Grid extends Plugin
                 $variable->set('grid', GridVariable::class);
             }
         );
-
-        Event::on(
-            Plugins::class,
-            Plugins::EVENT_AFTER_INSTALL_PLUGIN,
-            function (PluginEvent $event) {
-                if ($event->plugin === $this) {
-                }
-            }
-        );
-
-//        Event::on(MatrixBlock::class, MatrixBlock::EVENT_BEFORE_SAVE, function(ModelEvent $event) {
-//            if ($event->isNew) {
-//                Craft::dd($event->sender);
-//            }
-//        });
 
         Craft::info(
             Craft::t(
