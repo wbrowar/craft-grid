@@ -29,10 +29,6 @@ To install the plugin, you can find it in the [Craft Plugin Store](https://plugi
 
 Grid is a field that lets content editors lay out content connected through matrix and other relation fields (entries, assets, etc...). Grid lets you define CSS grid rules for different layout breakpoints and lets editors optimize content layout for different screen sizes.
 
-Grid creates HTML and CSS that is used on the front-end of your site. 
-
----
-
 ## Configuring Grid
 
 ### Target Field
@@ -55,13 +51,13 @@ When setting up a Grid field a drop down field selects the target field from a l
 
 ### Field Settings
 
-![Screenshot](resources/img/settings.png)
-
 #### Layouts
 
 Grid‘s CSS code is generated mobile first, so the first grid layout is meant for mobile devices or it can used without any other breakpoints. To create additional grid layouts, create a breakpoint at the bottom of the page.
 
 When adding a layout, the breakpoint‘s `min-width` value is required. This is set as a number in pixel units. Grid layouts are sorted from smallest to largest breakpoint `min-width` value.
+
+![Screenshot](resources/img/settings.png)
 
 ---
 
@@ -108,26 +104,21 @@ When a piece of content has been laid onto the grid, a check mark will appear ne
 To render a grid field, drop this into your Twig template.
 
 ```twig
-{% grid entry.grid as gridItems %}
+{% grid entry.gridHandle as gridItems %}
     {% for item in gridItems %}
         {% griditem %}
-            {{ item.content.title }}
+            {# use item.content.fieldHandle to render grid item content #}
         {% endgriditem %}
     {% endfor %}
 {% endgrid %}
 ```
 
-The `grid` block requires that you pass in your grid field (`entry.grid`). Grid will determine the element and target field associated with the Grid field, however this can also be set (see Advanced Options). The `grid` block creates an HTML element along with the appropriate classes.
-
-On the `grid` block, `gridItems` is a variable that‘s name can be set to anything you‘d like.
-
-`gridItems` represents all of the content in the target field—along with data from the `grid` block. A `for` loop is used to access each grid item.
-
-The `griditem` block creates an HTML element with the right classes to make your layout work.
-
-The content for each `item` can be accessed through `{{ item.content.fieldHandle }}`. For example, if each `item.content` was an entry, `{{ item.content.title }}` would display the title field.
-
-Here's an example of a matrix field that is processed inside of the `griditem` block:
+- The `grid` block requires that you pass in your grid field (`entry.gridHandle`). Grid will determine the element and target field associated with the Grid field, however this can also be set (see Advanced Options). The `grid` block creates an HTML element along with the appropriate classes.
+- On the `grid` block, `gridItems` is a variable that‘s name can be set to anything you‘d like.
+- `gridItems` represents all of the content in the target field—along with data from the `grid` block. A `for` loop is used to access each grid item.
+- The `griditem` block creates an HTML element with the right classes to make your layout work.
+- The content for each `item` can be accessed through `{{ item.content.fieldHandle }}`. For example, if each `item.content` was an entry, `{{ item.content.title }}` would display the title field.
+- Here's an example of a matrix field that is processed inside of the `griditem` block:
 
 ```twig
 {% grid entry.grid as gridItems %}
@@ -135,9 +126,9 @@ Here's an example of a matrix field that is processed inside of the `griditem` b
         {% griditem %}
             {% switch item.content.type.handle %}
                 {% case 'text' %}
-                    {{ item.content.myText }}
+                    <p>{{ item.content.myText }}</p>
                 {% case 'image' %}
-                    {{ item.content.myImage }}
+                    <img src="{{ item.content.myImage.one().url }}" alt="{{ item.content.myImage.one().title }}">
             {% endswitch %}
         {% endgriditem %}
     {% endfor %}
@@ -148,8 +139,6 @@ Here's an example of a matrix field that is processed inside of the `griditem` b
 
 #### Advanced Twig Options
 The `grid` block and `griditem` block accept more arguments and configuration when needed.
-
----
 
 ##### Target Array
 
