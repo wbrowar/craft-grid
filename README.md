@@ -9,7 +9,7 @@ Content manage CSS Grid for matrix and other element-based fields.
 This plugin requires Craft CMS 3.1.7 or later.
 A browser that support CSS Grid Layout and CSS Custom Properties. For more information on browser support, see [Browser Support](https://github.com/wbrowar/craft-grid#browser-support), below.
 
-> 🚧 During BETA, Grid is not intended for use on production. Data might change or get corrupted, so please use Grid in a test environment only.
+> 🚧 During BETA, Grid is not intended for use on production. Please use Grid in a test environment only.
 
 ## Installation
 
@@ -29,17 +29,17 @@ To install the plugin, you can find it in the [Craft Plugin Store](https://plugi
 
 Grid is a field that lets content editors lay out content connected through matrix and other relation fields (entries, assets, etc...).
 
-![Adding field layouts](resources/img/demo-field-settings.png)
-
 Grid‘s settings let you define CSS grid rules for different layout breakpoints.
 
-![Laying out content](resources/img/demo-field-input.png)
+![Adding field layouts](resources/img/demo-field-settings.png)
 
 Content editors can optimize content layout for different screen sizes.
 
-![CSS grid code rendered on the front end](resources/img/demo-front-end.png)
+![Laying out content](resources/img/demo-field-input.png)
 
 [Flexible Twig tags](https://github.com/wbrowar/craft-grid#adding-grid-to-a-twig-template) create the grid container and wraps all of the grid items while generating the CSS for each layout.
+
+![CSS grid code rendered on the front end](resources/img/demo-front-end.png)
 
 ## Configuring Grid
 
@@ -103,9 +103,9 @@ You can use valid sizing units—such as `fr`, `px`, `%`, `em`, or `rem`—and y
 
 When a Grid field is added to an element—such as an entry—it will look for its target field and display all of the items that populate the target field. At first, the field shows information for the smallest layout and at the top of the field you will see an icon that lets you select other layouts.
 
-To lay out a piece of content onto the grid, click on the title of the content to begin. Click on a cell in the grid to set the starting point in that cell, then click on another cell to set the ending point.
+To lay out a piece of content onto the grid, click on the title of the content to begin. Click on a cell in the grid to set the starting point in that cell, then click on the same cell or on another cell to set the ending point.
 
-When a piece of content has been laid onto the grid, a check mark will appear next to the title.
+When a piece of content has been laid onto the grid, a check mark will appear next to the title. Content that isn‘t laid out will be hidden (via CSS `display`, `visibility`, and `opacity` properties).
 
 *TIP: Because CSS Grid allows it, you can overlap items in your layout. The order of the items in the target field determines which items are in the front and which are in the back.*
 
@@ -125,7 +125,7 @@ To render a grid field, drop this into your Twig template.
 {% endgrid %}
 ```
 
-- The `grid` block requires that you pass in your grid field (`entry.gridHandle`). Grid will determine the element and target field associated with the Grid field, however this can also be set (see Advanced Options). The `grid` block creates an HTML element along with the appropriate classes.
+- The `grid` block requires that you pass in your grid field (`entry.gridHandle`). Grid will determine the element and target field associated with the Grid field, however this can also be set (see [Advanced Twig Options](https://github.com/wbrowar/craft-grid#advanced-twig-options)). The `grid` block creates an HTML element along with the appropriate classes.
 - On the `grid` block, `gridItems` is a variable that‘s name can be set to anything you‘d like.
 - `gridItems` represents all of the content in the target field—along with data from the `grid` block. A `for` loop is used to access each grid item.
 - The `griditem` block creates an HTML element with the right classes to make your layout work.
@@ -154,7 +154,7 @@ The `grid` block and `griditem` block accept more arguments and configuration wh
 
 ##### Target Array
 
-To specify your target field or to use eager loading for your target field, add your target field and the keyword `using` be for your Grid field on the `grid` block:
+To specify your target field or to use eager loading for your target field, add your target field and the keyword `using` before your Grid field on the `grid` block:
 
 ```twig
 {% grid entry.relatedEntries.with['featuredImage'].all() using entry.grid as gridItems %}
@@ -214,6 +214,8 @@ The `griditem` block creates a `<div>` tag for each grid item. A configuration o
 CSS Grid actually started out as a [feature in Internet Explorer 10](https://caniuse.com/#feat=css-grid), however, since then an updated spec has emerged and gained support in modern browsers. While it is possible—and often easy—to support the IE spec, Grid only supports the modern, non-prefixed spec.
 
 To ensure that the right CSS spec is available, all of the CSS generated by Grid is wrapped in an `@supports` query. CSS Feature Queries and CSS Custom Properties—which is what the query is validating—are not available on any version of IE.
+
+Grid doesn‘t rely on or modify your CSS, so fallback CSS can be set when needed.
 
 ---
 
