@@ -1,8 +1,8 @@
+<img src="resources/img/icon.png" alt="Grid icon" width="200">
+
 # Grid plugin for Craft CMS 3.1.x [BETA]
 
 Content manage CSS Grid for matrix and other element-based fields.
-
-<img src="resources/img/icon.png" alt="Grid icon" width="200">
 
 ## Requirements
 
