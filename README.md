@@ -2,7 +2,7 @@
 
 Content manage CSS Grid for matrix and other element-based fields.
 
-![Screenshot](resources/img/live-preview-med.png)
+![CSS grid code rendered on the front end](resources/img/demo-front-end.png)
 
 ## Requirements
 
@@ -27,7 +27,19 @@ To install the plugin, you can find it in the [Craft Plugin Store](https://plugi
 
 ## Grid Overview
 
-Grid is a field that lets content editors lay out content connected through matrix and other relation fields (entries, assets, etc...). Grid lets you define CSS grid rules for different layout breakpoints and lets editors optimize content layout for different screen sizes.
+Grid is a field that lets content editors lay out content connected through matrix and other relation fields (entries, assets, etc...).
+
+![Adding field layouts](resources/img/demo-field-settings.png)
+
+Grid‘s settings let you define CSS grid rules for different layout breakpoints.
+
+![Laying out content](resources/img/demo-field-input.png)
+
+Content editors can optimize content layout for different screen sizes.
+
+![CSS grid code rendered on the front end](resources/img/demo-front-end.png)
+
+[Flexible Twig tags](https://github.com/wbrowar/craft-grid#adding-grid-to-a-twig-template) create the grid container and wraps all of the grid items while generating the CSS for each layout.
 
 ## Configuring Grid
 
@@ -57,7 +69,7 @@ Grid‘s CSS code is generated mobile first, so the first grid layout is meant f
 
 When adding a layout, the breakpoint‘s `min-width` value is required. This is set as a number in pixel units. Grid layouts are sorted from smallest to largest breakpoint `min-width` value.
 
-![Screenshot](resources/img/settings.png)
+![Breakpoint Settings](resources/img/settings.png)
 
 ---
 
@@ -87,7 +99,7 @@ You can use valid sizing units—such as `fr`, `px`, `%`, `em`, or `rem`—and y
 
 ## Using the Grid Field
 
-![Screenshot](resources/img/live-preview-med.png)
+![Live Preview example of grid layout](resources/img/live-preview-med.png)
 
 When a Grid field is added to an element—such as an entry—it will look for its target field and display all of the items that populate the target field. At first, the field shows information for the smallest layout and at the top of the field you will see an icon that lets you select other layouts.
 
