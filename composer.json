@@ -2,7 +2,7 @@
     "name": "wbrowar/craft-grid",
     "description": "Content manage CSS grids for matrix and relation fields.",
     "type": "craft-plugin",
-    "version": "1.0.0-beta.1",
+    "version": "1.0.0-beta.2",
     "keywords": [
         "craft",
         "cms",
@@ -11,8 +11,8 @@
         "grid"
     ],
     "support": {
-        "docs": "https://github.com/wbrowar/grid/blob/master/README.md",
-        "issues": "https://github.com/wbrowar/grid/issues"
+        "docs": "https://github.com/wbrowar/craft-grid/blob/master/README.md",
+        "issues": "https://github.com/wbrowar/craft-grid/issues"
     },
     "license": "proprietary",
     "authors": [

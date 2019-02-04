@@ -31,14 +31,60 @@ class GridService extends Component
     /*
      * @return mixed
      */
+    public function getChildIsComplete(array $args)
+    {
+        $layouts = [];
+
+        if (!empty($args['field'])
+            && !empty($args['value'])) {
+            // coming soon
+            // @TODO check that all target items are liad out
+        }
+
+        return $layouts;
+    }
+
+    /*
+     * @return mixed
+     */
+    public function getChildLayouts(array $args)
+    {
+        $layouts = [];
+
+        if (!empty($args['field'])
+            && !empty($args['id'])
+            && !empty($args['value'])) {
+            $itemId = 'id' . $args['id'];
+
+            foreach ($args['field']['layout']['widths'] as $width) {
+                $widthId = 'id' . $width;
+
+                if ($args['value'][$widthId][$itemId] ?? false) {
+                    $layouts[] = $width;
+                }
+            }
+        }
+
+        return $layouts;
+    }
+
+    /*
+     * @return mixed
+     */
     public function getChildrenValue()
     {
         $value = [];
         if (!empty($this->_render['field']) && !empty($this->_render['target'])) {
             if (($this->_render['field'] ?? false) && is_array($this->_render['field']) && ($this->_render['target'] ?? false) && is_array($this->_render['target'])) {
                 foreach ($this->_render['target'] as $item) {
+                    $field = $this->_render['field']['field'];
+                    $target = $this->_render['field']['target'];
+                    $fieldValue = $this->_render['field']['value'] ?? null;
+
                     $value[] = [
                         'content' => $item,
+                        'isComplete' => $this->getChildLayouts(['field' => $field, 'id' => $item->id ?? null, 'value' => $fieldValue]),
+                        'layouts' => $this->getChildLayouts(['field' => $field, 'id' => $item->id ?? null, 'value' => $fieldValue]),
                     ];
                 }
             }
@@ -50,7 +96,7 @@ class GridService extends Component
     /*
      * @return string
      */
-    public function registerGridCss($args)
+    public function registerGridCss(array $args)
     {
         if (!empty($args['field'])
             && !empty($args['selector'])
@@ -100,9 +146,44 @@ class GridService extends Component
             // END @supports
             $css .= '}';
 
-            Craft::$app->getView()->registerCss($css);
+            if (!empty($css)) {
+                Craft::$app->getView()->registerCss($css);
+            }
         }
     }
+
+    /*
+     * @return bool
+     */
+    public function resaveElementForNewMinWidths(int $elementId, string $fieldHandle, array $newMinWidths)
+    {
+        $element = Craft::$app->getElements()->getElementById($elementId);
+        $fieldValue = $element->getFieldValue($fieldHandle);
+        $saveElement = false;
+
+        if ($fieldValue['value'] ?? false) {
+            foreach ($newMinWidths as $widthMap) {
+                if ($fieldValue['value']['id' . $widthMap['old']] ?? false) {
+                    $fieldValue['value']['id' . $widthMap['new']] = $fieldValue['value']['id' . $widthMap['old']];
+                    unset($fieldValue['value']['id' . $widthMap['old']]);
+                    $saveElement = true;
+                }
+            }
+        }
+
+        if ($saveElement) {
+            $updatedGridFields = [$fieldHandle => Json::encode($fieldValue)];
+            $element->setFieldValues($updatedGridFields);
+            $saved = Craft::$app->getElements()->saveElement($element);
+
+            return $saved;
+        }
+
+        return false;
+    }
+
+    // Twig Rendering Methods
+    // =========================================================================
 
     /*
      * @return string
@@ -192,7 +273,6 @@ class GridService extends Component
             // Set grid selector
             // This is also suffixed later for child items
             $this->_render['parent']['selector'] = 'grid__' . StringHelper::toSnakeCase($this->_render['field']['field']['handle']) . '__' . StringHelper::toSnakeCase($this->_render['field']['target']['handle']);
-//            Craft::dd($this->_render['parent']['selector']);
         }
 
 
@@ -239,35 +319,8 @@ class GridService extends Component
         return '</' . $element . '>';
     }
 
-    /*
-     * @return bool
-     */
-    public function resaveElementForNewMinWidths($elementId, $fieldHandle, $newMinWidths)
-    {
-        $element = Craft::$app->getElements()->getElementById($elementId);
-        $fieldValue = $element->getFieldValue($fieldHandle);
-        $saveElement = false;
-
-        if ($fieldValue['value'] ?? false) {
-            foreach ($newMinWidths as $widthMap) {
-                if ($fieldValue['value']['id' . $widthMap['old']] ?? false) {
-                    $fieldValue['value']['id' . $widthMap['new']] = $fieldValue['value']['id' . $widthMap['old']];
-                    unset($fieldValue['value']['id' . $widthMap['old']]);
-                    $saveElement = true;
-                }
-            }
-        }
-
-        if ($saveElement) {
-            $updatedGridFields = [$fieldHandle => Json::encode($fieldValue)];
-            $element->setFieldValues($updatedGridFields);
-            $saved = Craft::$app->getElements()->saveElement($element);
-
-            return $saved;
-        }
-
-        return false;
-    }
+    // Private Methods
+    // =========================================================================
 
     /*
      * @return string

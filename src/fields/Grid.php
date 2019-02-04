@@ -80,6 +80,56 @@ class Grid extends Field
     /**
      * @inheritdoc
      */
+    public function afterSave(bool $isNew)
+    {
+        if (!$isNew) {
+            // Check for updated breakpoints
+            $layout = Json::decodeIfJson($this->layout);
+            $newMinWidths = [];
+            foreach ($layout['breakpoints'] as $breakpoint) {
+                if ($breakpoint['prevMinWidth'] !== $breakpoint['minWidth']) {
+                    $newMinWidths[] = [
+                        'old' => $breakpoint['prevMinWidth'],
+                        'new' => $breakpoint['minWidth'],
+                    ];
+                }
+            }
+            // Update all elements that have field
+            if (count($newMinWidths) > 0) {
+                // Get layouts that include this field
+                $layoutIds = (new Query())
+                    ->select(['layoutId'])
+                    ->from(['{{%fieldlayoutfields}}'])
+                    ->where('fieldId=:id', [':id' => $this->id])
+                    ->orderBy('layoutId ASC')
+                    ->column();
+
+                foreach ($layoutIds as $layoutId) {
+                    $elements = (new Query())
+                        ->select(['id'])
+                        ->from('{{%elements}}')
+                        ->where('fieldLayoutId=:layoutId', [':layoutId' => $layoutId])
+                        ->column();
+
+                    foreach ($elements as $elementId) {
+//                        \wbrowar\grid\Grid::$plugin->grid->resaveElementForNewMinWidths($elementId, $this->handle, $newMinWidths);
+                        Craft::$app->getQueue()->push(new ResaveElements([
+                            'description' => Craft::t('grid', 'Resaving element with id: ' . $elementId),
+                            'elementId' => $elementId,
+                            'fieldHandle' => $this->handle,
+                            'newMinWidths' => $newMinWidths,
+                        ]));
+                    }
+                }
+            }
+        }
+
+        parent::afterSave($isNew);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function afterElementSave(ElementInterface $element, bool $isNew)
     {
         $updatedGridFields = [];
@@ -154,56 +204,6 @@ class Grid extends Field
         }
 
         parent::afterElementSave($element, $isNew);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function afterSave(bool $isNew)
-    {
-
-        // Check for updated breakpoints
-        $layout = Json::decodeIfJson($this->layout);
-        $newMinWidths = [];
-        foreach ($layout['breakpoints'] as $breakpoint) {
-            if ($breakpoint['prevMinWidth'] !== $breakpoint['minWidth']) {
-                $newMinWidths[] = [
-                    'old' => $breakpoint['prevMinWidth'],
-                    'new' => $breakpoint['minWidth'],
-                ];
-            }
-        }
-        // Update all elements that have field
-        if (count($newMinWidths) > 0) {
-            // Get layouts that include this field
-            $layoutIds = (new Query())
-                ->select(['layoutId'])
-                ->from(['{{%fieldlayoutfields}}'])
-                ->where('fieldId=:id', [':id' => $this->id])
-                ->orderBy('layoutId ASC')
-                ->column();
-
-            foreach ($layoutIds as $layoutId) {
-                $elements = (new Query())
-                    ->select(['id'])
-                    ->from('{{%elements}}')
-                    ->where('fieldLayoutId=:layoutId', [':layoutId' => $layoutId])
-                    ->column();
-
-                foreach ($elements as $elementId) {
-                    \wbrowar\grid\Grid::$plugin->grid->resaveElementForNewMinWidths($elementId, $this->handle, $newMinWidths);
-//                    Craft::$app->getQueue()->push(new ResaveElements([
-//                        'description' => Craft::t('grid', 'Resaving element with id: ' . $elementId),
-//                        'elementId' => $elementId,
-//                        'fieldHandle' => $this->handle,
-//                        'newMinWidths' => $newMinWidths,
-//                    ]));
-                }
-            }
-        }
-//        Craft::dd($newMinWidths);
-
-        parent::afterSave($isNew);
     }
 
     /**
