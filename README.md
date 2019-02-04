@@ -2,7 +2,7 @@
 
 Content manage CSS Grid for matrix and other element-based fields.
 
-![CSS grid code rendered on the front end](resources/img/demo-front-end.png)
+<img src="resources/img/icon.png" alt="Grid icon" width="200">
 
 ## Requirements
 
