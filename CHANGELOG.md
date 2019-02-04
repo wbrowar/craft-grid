@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.0-beta.3 - 2019-02-04
+### Added
+- Added support for Craft Commerce Products field
+
+### Fixed
+- Fixed a bug that prevented creating a new layout
+
 ## 1.0.0-beta.2 - 2019-02-03
 ### Fixed
 - Fixed a bug that prevented creating a new grid field

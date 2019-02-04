@@ -32,7 +32,9 @@
 
 {% set fieldOptions = [] %}
 {% for item in fields %}
-    {% if item is instance of('craft\\fields\\Assets')
+    {% if item is instance of('craft\\commerce\\fields\\Products')
+        or item is instance of('craft\\commerce\\fields\\Variants')
+        or item is instance of('craft\\fields\\Assets')
         or item is instance of('craft\\fields\\Categories')
         or item is instance of('craft\\fields\\Entries')
         or item is instance of('craft\\fields\\Matrix')

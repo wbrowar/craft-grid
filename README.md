@@ -55,11 +55,16 @@ When setting up a Grid field a drop down field selects the target field from a l
 
 ### Supported Field Types
 
+#### Core
 - Assets
 - Categories
 - Entries
 - Matrix
 - Users
+
+#### Craft Commerce
+- Products
+- Variants
 
 ### Field Settings
 
