@@ -54,7 +54,7 @@ class GridNode extends \Twig_Node
 
         $compiler
             ->raw(");\n")
-            ->write("\$context['" . $this->getAttribute('children') . "'] = " . Grid::class . "::\$plugin->grid->getChildrenValue();\n")
+            ->write("\$context['" . $this->getAttribute('children') . "'] = " . Grid::class . "::\$plugin->grid->getRenderChildrenValue();\n")
             ->subcompile($this->getNode('body'))
             ->write("unset(\$context['" . $this->getAttribute('children') . "']);\n")
             ->write("echo " . Grid::class . "::\$plugin->grid->renderGridNodeClose();\n");

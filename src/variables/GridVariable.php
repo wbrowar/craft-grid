@@ -28,12 +28,8 @@ class GridVariable
      * @param null $optional
      * @return string
      */
-    public function exampleVariable($optional = null)
+    public function value(array $target, array $grid, array $args=[])
     {
-        $result = "And away we go to the Twig template...";
-        if ($optional) {
-            $result = "I'm feeling optional today...";
-        }
-        return $result;
+        return Grid::$plugin->grid->getGridValue($target, $grid, $args);
     }
 }

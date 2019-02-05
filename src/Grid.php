@@ -10,10 +10,7 @@
 
 namespace wbrowar\grid;
 
-use craft\elements\MatrixBlock;
-use craft\events\ModelEvent;
-use craft\events\RegisterTemplateRootsEvent;
-use craft\fields\Matrix;
+use craft\elements\Entry;
 use craft\web\View;
 use wbrowar\grid\services\Grid as GridService;
 use wbrowar\grid\twigextensions\GridTwigExtension;
@@ -22,8 +19,6 @@ use wbrowar\grid\fields\Grid as GridField;
 
 use Craft;
 use craft\base\Plugin;
-use craft\services\Plugins;
-use craft\events\PluginEvent;
 use craft\services\Fields;
 use craft\web\twig\variables\CraftVariable;
 use craft\events\RegisterComponentTypesEvent;
