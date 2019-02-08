@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.1 - 2019-02-08
+### Fixed
+- Fixed a couple of errors that occur when no grid layout has been set before render
+
 ## 1.0.0 - 2019-02-05
 ### Added
 - You can now use `em` or `rem` units for media queries by passing in `unit: 'em'` into the `grid` block arguments

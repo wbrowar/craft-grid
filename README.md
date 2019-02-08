@@ -245,6 +245,14 @@ $gridValue = Grid::$plugin->grid->getGridValue($entry->pageContent, $entry->grid
 {% set gridValue = craft.grid.value(entry.pageContent.all(), entry.grid) %}
 ```
 
+### New to CSS Grid Layout?
+
+If you haven't used CSS Grid Layout in your projects before, here are a few resources that can help you understand its concepts:
+
+- [The Experimental Layout LAB of Jen Simmons](https://labs.jensimmons.com)
+- [Grid by Example](https://gridbyexample.com)
+- [CSS Grid (course by Wes Bos)](https://cssgrid.io)
+
 ### Browser Support
 
 CSS Grid actually started out as a [feature in Internet Explorer 10](https://caniuse.com/#feat=css-grid), however, since then an updated spec has emerged and gained support in modern browsers. While it is possible—and often easy—to support the IE spec, Grid only supports the modern, non-prefixed spec.

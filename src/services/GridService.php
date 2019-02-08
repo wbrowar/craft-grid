@@ -135,7 +135,9 @@ class GridService extends Component
                     if ($maxWidth) {
                         $css .= ' @media (max-width: ' . $this->getCssSize($maxWidth, $unit) . ') {';
                     }
-                    $css .= $this->_gridItemCssForBreakpoint($args['target']['items'], $args['value']['id' . 0], $args['selector']);
+                    if ($args['value']['id' . 0] ?? false) {
+                        $css .= $this->_gridItemCssForBreakpoint($args['target']['items'], $args['value']['id' . 0], $args['selector']);
+                    }
                     if ($maxWidth) {
                         $css .= '}';
                     }
@@ -145,7 +147,9 @@ class GridService extends Component
                     $css .= ' .' . $args['selector'] . ' {';
                     $css .= $this->_gridCssForBreakpoint($breakpoint);
                     $css .= '}';
-                    $css .= $this->_gridItemCssForBreakpoint($args['target']['items'], $args['value']['id' . $minWidth], $args['selector']);
+                    if ($args['value']['id' . 0] ?? false) {
+                        $css .= $this->_gridItemCssForBreakpoint($args['target']['items'], $args['value']['id' . $minWidth], $args['selector']);
+                    }
                     $css .= '}';
                 }
             }
@@ -217,13 +221,20 @@ class GridService extends Component
      */
     public function getGridItemValue($item, array $grid, array $args=[]):array
     {
-        $gridField = $grid['field'];
-        $gridValue = $grid['value'];
+        if (($grid['field'] ?? false) && ($grid['value'] ?? false)) {
+            $gridField = $grid['field'];
+            $gridValue = $grid['value'];
+
+            return [
+                'content' => $item,
+    //            'isComplete' => $this->getChildLayouts(['field' => $gridField, 'id' => $item->id ?? null, 'value' => $gridValue]),
+                'layouts' => $this->getChildLayouts(['field' => $gridField, 'id' => $item->id ?? null, 'value' => $gridValue]),
+            ];
+        }
 
         return [
-            'content' => $item,
-//            'isComplete' => $this->getChildLayouts(['field' => $gridField, 'id' => $item->id ?? null, 'value' => $gridValue]),
-            'layouts' => $this->getChildLayouts(['field' => $gridField, 'id' => $item->id ?? null, 'value' => $gridValue]),
+            'content' => null,
+            'layouts' => null,
         ];
     }
 
