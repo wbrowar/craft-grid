@@ -139,67 +139,69 @@ class Grid extends Field
 
         // Resave fields that use newX when adding content
         if ($fieldValue['target'] ?? false) {
-            $targetFieldId = $fieldValue['target']['id'];
-            $targetField = Craft::$app->getFields()->getFieldById($targetFieldId);
-            if ($element['ownerId'] ?? false) {
-                $targetElement = Craft::$app->getElements()->getElementById($element['ownerId']);
-            } else {
-                $targetElement = $element;
-            }
+            if ($fieldValue['target']['id'] !== '__none__') {
+                $targetFieldId = $fieldValue['target']['id'];
+                $targetField = Craft::$app->getFields()->getFieldById($targetFieldId);
+                if ($element['ownerId'] ?? false) {
+                    $targetElement = Craft::$app->getElements()->getElementById($element['ownerId']);
+                } else {
+                    $targetElement = $element;
+                }
 
-            $targetValue = $targetElement->getFieldValue($targetField->handle);
+                $targetValue = $targetElement->getFieldValue($targetField->handle);
 
-            switch ($targetValue->elementType) {
-                case 'craft\\elements\\MatrixBlock':
-                    if ($fieldValue['target']['items'] ?? false) {
-                        // Store all block IDs
-                        $targetValueIds = [];
-                        foreach ($targetValue->all() as $block) {
-                            $targetValueIds[] = strval($block->id);
-                        }
-
-                        // Map all newX IDs
-                        $fieldTargetItemIds = [];
-                        for ($j=0; $j<count($fieldValue['target']['items']); $j++) {
-                            // Store ID
-                            $fieldTargetItemIds[] = strval($fieldValue['target']['items'][$j]['id']);
-                        }
-
-                        // Map all newX IDs to their new IDs
-                        $xToId = [];
-                        for ($j=0; $j<count($fieldTargetItemIds); $j++) {
-                            if (substr($fieldTargetItemIds[$j], 0, 3) == 'new') {
-                                $xToId['id' . $fieldTargetItemIds[$j]] = 'id' . $targetValueIds[$j];
+                switch ($targetValue->elementType) {
+                    case 'craft\\elements\\MatrixBlock':
+                        if ($fieldValue['target']['items'] ?? false) {
+                            // Store all block IDs
+                            $targetValueIds = [];
+                            foreach ($targetValue->all() as $block) {
+                                $targetValueIds[] = strval($block->id);
                             }
-                        }
 
-                        if (count(array_keys($xToId)) > 0) {
-                            // Iterate through field value and replace newX IDs with new ID
-                            foreach ($fieldValue['value'] as &$breakpoint) {
-                                // Copy each of the items that need to be replaced
-                                foreach (array_keys($breakpoint) as $item) {
-                                    if ($xToId[$item] ?? false) {
-                                        $breakpoint[$xToId[$item]] = $breakpoint[$item];
-//                                                unset($breakpoint[$item]);
+                            // Map all newX IDs
+                            $fieldTargetItemIds = [];
+                            for ($j=0; $j<count($fieldValue['target']['items']); $j++) {
+                                // Store ID
+                                $fieldTargetItemIds[] = strval($fieldValue['target']['items'][$j]['id']);
+                            }
+
+                            // Map all newX IDs to their new IDs
+                            $xToId = [];
+                            for ($j=0; $j<count($fieldTargetItemIds); $j++) {
+                                if (substr($fieldTargetItemIds[$j], 0, 3) == 'new') {
+                                    $xToId['id' . $fieldTargetItemIds[$j]] = 'id' . $targetValueIds[$j];
+                                }
+                            }
+
+                            if (count(array_keys($xToId)) > 0) {
+                                // Iterate through field value and replace newX IDs with new ID
+                                foreach ($fieldValue['value'] as &$breakpoint) {
+                                    // Copy each of the items that need to be replaced
+                                    foreach (array_keys($breakpoint) as $item) {
+                                        if ($xToId[$item] ?? false) {
+                                            $breakpoint[$xToId[$item]] = $breakpoint[$item];
+    //                                                unset($breakpoint[$item]);
+                                        }
                                     }
                                 }
-                            }
-                            // Iterate through target and replace newX IDs with new ID
-                            for ($j=0; $j<count($fieldValue['target']['items']); $j++) {
-                                if (substr($fieldValue['target']['items'][$j]['id'], 0, 3) == 'new') {
-                                    $fieldValue['target']['items'][$j]['id'] = intval(substr($xToId['id' . $fieldValue['target']['items'][$j]['id']], 2));
+                                // Iterate through target and replace newX IDs with new ID
+                                for ($j=0; $j<count($fieldValue['target']['items']); $j++) {
+                                    if (substr($fieldValue['target']['items'][$j]['id'], 0, 3) == 'new') {
+                                        $fieldValue['target']['items'][$j]['id'] = intval(substr($xToId['id' . $fieldValue['target']['items'][$j]['id']], 2));
+                                    }
                                 }
+
+                                $updatedGridFields[$fieldHandle] = Json::encode($fieldValue);
                             }
-
-                            $updatedGridFields[$fieldHandle] = Json::encode($fieldValue);
                         }
-                    }
-                    break;
-            }
+                        break;
+                }
 
-            if (!empty($updatedGridFields)) {
-                $element->setFieldValues($updatedGridFields);
-                Craft::$app->getElements()->saveElement($element);
+                if (!empty($updatedGridFields)) {
+                    $element->setFieldValues($updatedGridFields);
+                    Craft::$app->getElements()->saveElement($element);
+                }
             }
         }
 
@@ -232,6 +234,8 @@ class Grid extends Field
                 'handle' => $this->handle,
                 'layout' => Json::decodeIfJson($this->layout),
             ];
+
+//            Craft::dd($value);
 
             return $value;
         }
@@ -287,43 +291,54 @@ class Grid extends Field
         $namespacedId = Craft::$app->getView()->namespaceInputId($id);
 
         // Get target info
-        $targetFieldId = intval(substr($this->targetFieldId, 2));
-        $targetField = Craft::$app->getFields()->getFieldById($targetFieldId);
+        if ($this->targetFieldId === '__none__') {
+            $target = [
+                'class' => 'index',
+                'handle' => 'index',
+                'id' => '__none__',
+                'name' => 'Grid Items'
+            ];
+        } else {
+            $targetFieldId = intval(substr($this->targetFieldId, 2));
+            $targetField = Craft::$app->getFields()->getFieldById($targetFieldId);
 
-        if ($targetField ?? false) {
-            // Variables to pass down to our field JavaScript to let it namespace properly
-            $jsonVars = [
-                'id' => $id,
-                'name' => $this->handle,
-                'namespace' => $namespacedId,
-                'prefix' => Craft::$app->getView()->namespaceInputId(''),
-                'field' => [
-                    'layout' => Json::decodeIfJson($this->layout),
-                ],
-                'target' => [
+            if ($targetField ?? false) {
+                $target = [
                     'class' => get_class($targetField),
                     'handle' => $targetField->handle,
                     'id' => $targetFieldId,
                     'name' => $targetField->name,
-                ],
-                'value' => $value,
-            ];
-            $jsonVars = Json::encode($jsonVars);
-            Craft::$app->getView()->registerJs("$('#{$namespacedId}-field').GridField(" . $jsonVars . ");");
-
-            // Render the input template
-            return Craft::$app->getView()->renderTemplate(
-                'grid/field/Grid_input',
-                [
-                    'name' => $this->handle,
-                    'value' => $value,
-                    'field' => $this,
-                    'id' => $id,
-                    'namespacedId' => $namespacedId,
-                ]
-            );
-        } else {
-            return 'The field with the ID, ' . $this->targetFieldId . ', is not available. Please select another target field.';
+                ];
+            } else {
+                return 'The field with the ID, ' . $this->targetFieldId . ', is not available. Please select another target field.';
+            }
         }
+
+        // Variables to pass down to our field JavaScript to let it namespace properly
+        $jsonVars = [
+            'id' => $id,
+            'name' => $this->handle,
+            'namespace' => $namespacedId,
+            'prefix' => Craft::$app->getView()->namespaceInputId(''),
+            'field' => [
+                'layout' => Json::decodeIfJson($this->layout),
+            ],
+            'target' => $target,
+            'value' => $value,
+        ];
+        $jsonVars = Json::encode($jsonVars);
+        Craft::$app->getView()->registerJs("$('#{$namespacedId}-field').GridField(" . $jsonVars . ");");
+
+        // Render the input template
+        return Craft::$app->getView()->renderTemplate(
+            'grid/field/Grid_input',
+            [
+                'name' => $this->handle,
+                'value' => $value,
+                'field' => $this,
+                'id' => $id,
+                'namespacedId' => $namespacedId,
+            ]
+        );
     }
 }

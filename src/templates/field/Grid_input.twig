@@ -16,6 +16,8 @@
 {#{% import "_includes/forms" as forms %}#}
 {% import "grid/macros/helpers.twig" as helpers %}
 
+{% set iconPath = view.getAssetManager().getPublishedPath('@wbrowar/grid/assetbundles/grid/dist/icon', true) %}
+
 <div class="grid__input" v-cloak>
     <div class="grid__input__header">
         <div class="grid__input__select" v-cloak>
@@ -32,11 +34,19 @@
     <div class="grid__input__breakpoints" v-cloak>
         <div class="grid__input__breakpoint" :class="{ 'grid__input__breakpoint--before': currentLayoutShown > breakpoint.minWidth, 'grid__input__breakpoint--after': currentLayoutShown < breakpoint.minWidth }" v-for="breakpoint in field.layout.breakpoints" v-cloak>
             <div class="grid__input__target_items">
-                <div><b v-text="target.name"></b></div>
-                <div class="grid__input__target_item" v-for="(item, index) in target.items" v-if="item.status === 'enabled'" v-cloak>
-                    <div class="grid__input__target_item__complete"><span v-if="targetItemDataIsSet(breakpoint, item, true)" title="{{ 'Item has been laid out'|t('grid') }}"><b>✓</b></span></div>
-                    <div class="grid__input__target_item__remove"><span class="delete icon" title="{{ 'Remove from grid'|t('grid') }}" @click="removeTargetItemData(breakpoint, item)" v-if="targetItemDataIsSet(breakpoint, item)"></span><span @click="setTargetItemData(breakpoint, item)" class="add icon light" v-else></span></div>
-                    <div class="grid__input__target_item__label" :class="{ 'grid__input__target_item__label--selected': targetItemBeingSet.id === item.id }" @click="setTargetItemData(breakpoint, item)" @mouseenter="onPreviewItemMouseOver(breakpoint, item)" @mouseleave="onPreviewItemMouseOut(breakpoint, item)" :title="item.title"><span>${ item.title }</span></div>
+                <div style="height: 100%">
+                    <div class="grid__input__target_items__list">
+                        <div><b v-text="target.name"></b></div>
+                        <div class="grid__input__target_item" v-for="(item, index) in target.items" v-if="item.status === 'enabled'" v-cloak>
+                            <div class="grid__input__target_item__complete"><span class="grid__input__target_item__complete--completed" v-if="targetItemDataIsSet(breakpoint, item, true)" title="{{ 'Item has been laid out'|t('grid') }}"><b>✓</b></span><span class="grid__input__target_item__complete--incomplete" v-else><span v-if="breakpoint.notLaidOut === 'visible'" title="{{ 'Item will be added to the grid'|t('grid') }}">{{ svg(iconPath ~ '/visible.svg') }}</span><span title="{{ 'Item will be hidden for this layout'|t('grid') }}" v-else>{{ svg(iconPath ~ '/hidden.svg') }}</span></span></div>
+                            <div class="grid__input__target_item__remove" :class="targetItemDataIsSet(breakpoint, item) ? 'grid__input__target_item__remove--x' : 'grid__input__target_item__remove--add'" title="{{ 'Add to layout'|t('grid') }}"><span class="delete icon" title="{{ 'Remove item from grid'|t('grid') }}" @click="removeTargetItemData(breakpoint, item)" title="{{ 'Remove from layout'|t('grid') }}" v-if="targetItemDataIsSet(breakpoint, item)"></span><span @click="setTargetItemData(breakpoint, item)" class="add icon light" v-else></span></div>
+                            <div class="grid__input__target_item__label" :class="{ 'grid__input__target_item__label--selected': targetItemBeingSet.id === item.id }" @click="setTargetItemData(breakpoint, item)" @mouseenter="onPreviewItemMouseOver(breakpoint, item)" @mouseleave="onPreviewItemMouseOut(breakpoint, item)" title="{{ 'Add to layout'|t('grid') }}"><span>${ item.title }</span></div>
+                        </div>
+                        <div class="grid__input__add_remove_index" v-if="target.id === '__none__'">
+                            <div class="btn icon add small" @click="indexTargetItemsTotal++">Item</div>
+                            <div class="btn icon delete small" @click="indexTargetItemsTotal--">Item</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="grid__input__target_preview grid__preview" :class="{ 'grid__preview--auto_columns': breakpoint.modeColumns === 'auto', 'grid__preview--auto_rows': breakpoint.modeRows === 'auto' }">

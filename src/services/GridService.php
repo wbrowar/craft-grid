@@ -112,8 +112,6 @@ class GridService extends Component
             // BEGIN @supports
             $css = '@supports (--custom:property) {';
 
-//            Craft::dd($args['value']);
-
             for ($i=0; $i<count($args['field']['layout']['breakpoints']); $i++) {
                 $breakpoint = $args['field']['layout']['breakpoints'][$i];
                 $minWidth = $breakpoint['minWidth'];
@@ -135,9 +133,8 @@ class GridService extends Component
                     if ($maxWidth) {
                         $css .= ' @media (max-width: ' . $this->getCssSize($maxWidth, $unit) . ') {';
                     }
-                    if ($args['value']['id' . 0] ?? false) {
-                        $css .= $this->_gridItemCssForBreakpoint($args['target']['items'], $args['value']['id' . 0], $args['selector']);
-                    }
+//                    Craft::dd($breakpoint['notLaidOut']);
+                    $css .= $this->_gridItemCssForBreakpoint($args['target']['items'], $args['value']['id' . 0] ?? [], $args['selector'], $breakpoint['notLaidOut'] ?? 'hidden');
                     if ($maxWidth) {
                         $css .= '}';
                     }
@@ -147,9 +144,7 @@ class GridService extends Component
                     $css .= ' .' . $args['selector'] . ' {';
                     $css .= $this->_gridCssForBreakpoint($breakpoint);
                     $css .= '}';
-                    if ($args['value']['id' . 0] ?? false) {
-                        $css .= $this->_gridItemCssForBreakpoint($args['target']['items'], $args['value']['id' . $minWidth], $args['selector']);
-                    }
+                    $css .= $this->_gridItemCssForBreakpoint($args['target']['items'], $args['value']['id' . $minWidth] ?? [], $args['selector'], $breakpoint['notLaidOut'] ?? 'hidden');
                     $css .= '}';
                 }
             }
@@ -486,7 +481,7 @@ class GridService extends Component
     /*
      * @return string
      */
-    private function _gridItemCssForBreakpoint($items, $value, $selector)
+    private function _gridItemCssForBreakpoint($items, $value, $selector, $notLaidOut)
     {
         $css = '';
         for ($i=0; $i<count($items); $i++) {
@@ -498,9 +493,11 @@ class GridService extends Component
                     $css .= 'grid-row: ' . $item['rowStart'] . ' / ' . $item['rowEnd'] . ';';
                 $css .= '}';
             } else {
-                $css .= $itemSelector . ' {';
-                    $css .= 'display: none;grid-column: 1 / 2;grid-row: 1 / 2;visibility: hidden;opacity: 0;';
-                $css .= '}';
+                if ($notLaidOut === 'hidden') {
+                    $css .= $itemSelector . ' {';
+                        $css .= 'display: none;grid-column: 1 / 2;grid-row: 1 / 2;visibility: hidden;opacity: 0;';
+                    $css .= '}';
+                }
             }
         }
         return $css;

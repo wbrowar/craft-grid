@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.1.0 - 2019-02-10
+### Added
+- You can now create a grid field that is not tied to a target field
+  - Any array—like one made from an element query—can be passed into a `{% grid %}` block and laid out by a grid field
+  - Requires the `using` keyword syntax for rendering, as described here: https://github.com/wbrowar/craft-grid/blob/master/README.md#advanced-twig-options
+- You can now choose whether or not items that have not been laid out onto the grid will be visible or hidden
+  - This allows you to leave a layout blank and all items will be automatically added to the grid (or after the grid if there is no more room)
+
+### Changed
+- When changing a breakpoint on the field settings page, the layouts no longer re-order themselves until you are done changing the breakpoint width
+
+### Fixed
+- Added the correct prefix to let Grid fields be editable in the element editor (the popup that appears when you double-click an element)
+
 ## 1.0.1 - 2019-02-08
 ### Fixed
 - Fixed a couple of errors that occur when no grid layout has been set before render

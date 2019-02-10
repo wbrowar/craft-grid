@@ -43,7 +43,7 @@ Content editors can optimize content layout for different screen sizes.
 
 ### Target Field
 
-Grid fields must be paired up with an element-based field to work. In Grid, this is called the "target field".
+Grid fields can be paired up with an element-based field. In Grid, this is called the "target field".
 
 When setting up a Grid field a drop down field selects the target field from a list of supported field types, so it is best to create the target field before creating a Grid field.
 
@@ -63,6 +63,14 @@ When setting up a Grid field a drop down field selects the target field from a l
 #### Craft Commerce
 - Products
 - Variants
+
+### Using Grid Without a Target Field
+
+Grid can also be used as a general layout field when the content you want to lay out is not managed through the CMS. For example, this could be used for content collected by an element query, items in a table field, and data pulled from a decoded JSON string.
+
+To use a grid field without a target field, leave the `Target Field` option set to `None` on the field setting page.
+
+When rendering a grid field that doesn‘t have a target field, the data must be in the form of an array and it must be passed into the `{% grid %}` block, as detailed in [Advanced Twig Options](https://github.com/wbrowar/craft-grid/blob/master/README.md#advanced-twig-options).
 
 ### Field Settings
 
@@ -98,6 +106,14 @@ You can use valid sizing units—such as `fr`, `px`, `%`, `em`, or `rem`—and y
 
 *Row Mode works the same way for fixed row layouts.*
 
+##### Item Visibility
+
+By default, items that are not laid out onto a grid field layout will be hidden using CSS (`display: none`, `visibility: hidden`, `opacity: 0`, etc ...). Using the `Item Visibility` option, you may allow all items be visible and they will be added to your grid based on your grid‘s CSS.
+
+This could be useful on single-column layouts where you want to display all grid items in order, without taking the time to add each item to the layout.
+
+*NOTE: When there is no room left on a grid layout items can sometimes appear outside of the grid.*
+
 ---
 
 ## Using the Grid Field
@@ -108,7 +124,7 @@ When a Grid field is added to an element—such as an entry—it will look for i
 
 To lay out a piece of content onto the grid, click on the title of the content to begin. Click on a cell in the grid to set the starting point in that cell, then click on the same cell or on another cell to set the ending point.
 
-When a piece of content has been laid onto the grid, a check mark will appear next to the title. Content that isn‘t laid out will be hidden (via CSS `display`, `visibility`, and `opacity` properties).
+When a piece of content has been laid onto the grid, a check mark will appear next to the title.
 
 *TIP: Because CSS Grid allows it, you can overlap items in your layout. The order of the items in the target field determines which items are in the front and which are in the back.*
 

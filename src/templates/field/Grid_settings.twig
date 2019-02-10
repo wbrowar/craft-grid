@@ -30,7 +30,7 @@
 
 {% set fields = craft.app.fields.allFields() %}
 
-{% set fieldOptions = [] %}
+{% set fieldOptions = { '__none__': 'None' } %}
 {% for item in fields %}
     {% if item is instance of('craft\\commerce\\fields\\Products')
         or item is instance of('craft\\commerce\\fields\\Variants')
@@ -45,8 +45,8 @@
 
 {{ forms.selectField({
     label: 'Target Field',
-    instructions: 'The field that you are laying out with this Grid field.',
-    warning: 'Changing this will reset all layout data for this field.',
+    instructions: 'The field that you are laying out with this Grid field.'|t('grid'),
+    warning: 'Changing this will reset all layout data for this field.'|t('grid'),
     id: 'targetFieldId',
     name: 'targetFieldId',
     options: fieldOptions,
@@ -65,7 +65,7 @@
                 <div class="grid__settings__min_width">
                     <div class="grid__settings__min_width__field" v-if="breakpoint.prevMinWidth > 0">
                         {{ helpers.vueTextField({
-                            inputAttr: '@blur="validateMinWidth(breakpoint)" v-model.number.trim="breakpoint.minWidth"',
+                            inputAttr: '@blur="validateMinWidth(breakpoint)" v-model.number.trim.lazy="breakpoint.minWidth"',
                             instructions: '(min-width)',
                             label: 'Breakpoint'|t('grid'),
                             placeholder: '1024',
@@ -137,7 +137,7 @@
                         <div class="heading">
                             <label>{{ 'Column Mode'|t('grid') }}</label>
                             <div class="instructions">
-                                <p>{{ 'Determines if columns can be added later.'|t('grid') }}</p>
+                                <p>{{ 'Determines if columns can be added&nbsp;later.'|t('grid')|raw }}</p>
                             </div>
                         </div>
                         <div class="btngroup">
@@ -151,12 +151,26 @@
                         <div class="heading">
                             <label>{{ 'Row Mode'|t('grid') }}</label>
                             <div class="instructions">
-                                <p>{{ 'Determines if rows can be added later.'|t('grid') }}</p>
+                                <p>{{ 'Determines if rows can be added&nbsp;later.'|t('grid')|raw }}</p>
                             </div>
                         </div>
                         <div class="btngroup">
                             <div class="btn" :class="{ 'active': breakpoint.modeRows === 'fixed' }" @click="breakpoint.modeRows = 'fixed'">{{ 'Fixed'|t('grid') }}</div>
                             <div class="btn" :class="{ 'active': breakpoint.modeRows === 'auto' }" @click="breakpoint.modeRows = 'auto'">{{ 'Auto'|t('grid') }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid__settings__not_laid_out">
+                    <div class="field">
+                        <div class="heading">
+                            <label>{{ 'Item Visibility'|t('grid') }}</label>
+                            <div class="instructions">
+                                <p>{{ 'Items that are not laid out will&nbsp;be:'|t('grid')|raw }}</p>
+                            </div>
+                        </div>
+                        <div class="btngroup">
+                            <div class="btn" :class="{ 'active': breakpoint.notLaidOut === 'hidden' }" @click="breakpoint.notLaidOut = 'hidden'">{{ 'Hidden'|t('grid') }}</div>
+                            <div class="btn" :class="{ 'active': breakpoint.notLaidOut === 'visible' }" @click="breakpoint.notLaidOut = 'visible'">{{ 'Visible'|t('grid') }}</div>
                         </div>
                     </div>
                 </div>
