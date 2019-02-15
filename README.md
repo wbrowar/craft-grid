@@ -2,7 +2,7 @@
 
 # Grid for Craft CMS 3.1+
 
-Content manage CSS Grid for matrix and other element-based fields.
+A field that lets you content manage CSS Grid in Craft CMS.
 
 ## Requirements
 

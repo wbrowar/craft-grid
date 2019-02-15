@@ -57,10 +57,10 @@
                     <div v-for="(item, key, index) in fieldValue['id'+breakpoint.minWidth]" :class="{ 'grid__preview__grid--items--rollover': key === ('id' + targetItemBeingMousedOver) }" :style="stylePreviewGridItem(item)" v-cloak><span>${ item.title }</span></div>
                 </div>
                 <div class="grid__preview__grid grid__preview__grid--controls" :class="{ 'grid__preview__grid--controls--rollover': ['settingTargetItemStart', 'settingTargetItemEnd'].indexOf(currentAction) > -1 }" :style="stylePreviewGrid(breakpoint)">
-                    <div class="grid__preview__item" v-for="item in breakpoint.preview.items" @click="onPreviewItemClicked(breakpoint.minWidth, item)"></div>
+                    <div class="grid__preview__item" v-for="(item, key) in breakpoint.preview.items" @click="onPreviewItemClicked(breakpoint.minWidth, item)"></div>
                 </div>
-                <div class="grid__preview__add grid__preview__add--column" @click="addAutoColumn(breakpoint)" v-if="breakpoint.modeColumns === 'auto'">+ column</div>
-                <div class="grid__preview__add grid__preview__add--row" @click="addAutoRow(breakpoint)" v-if="breakpoint.modeRows === 'auto'">+ row</div>
+                <div class="grid__preview__add grid__preview__add--column" @click="addAutoColumn(breakpoint)" v-if="breakpoint.modeColumns === 'auto'"><span>+&nbsp;column</span></div>
+                <div class="grid__preview__add grid__preview__add--row" @click="addAutoRow(breakpoint)" v-if="breakpoint.modeRows === 'auto'"><span>+&nbsp;row</span></div>
             </div>
         </div>
     </div>

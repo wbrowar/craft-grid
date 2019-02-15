@@ -1,8 +1,8 @@
 {
     "name": "wbrowar/craft-grid",
-    "description": "Content manage CSS grids for matrix and relation fields.",
+    "description": "A field that lets you content manage CSS Grid in Craft CMS.",
     "type": "craft-plugin",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "keywords": [
         "craft",
         "cms",
