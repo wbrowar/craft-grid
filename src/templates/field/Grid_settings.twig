@@ -169,8 +169,22 @@
                             </div>
                         </div>
                         <div class="btngroup">
-                            <div class="btn" :class="{ 'active': breakpoint.notLaidOut === 'hidden' }" @click="breakpoint.notLaidOut = 'hidden'">{{ 'Hidden'|t('grid') }}</div>
+                            <div class="btn" :class="{ 'active': breakpoint.notLaidOut === 'hidden' }" @click="breakpoint.notLaidOut = 'hidden', breakpoint.showInInput = 'visible'">{{ 'Hidden'|t('grid') }}</div>
                             <div class="btn" :class="{ 'active': breakpoint.notLaidOut === 'visible' }" @click="breakpoint.notLaidOut = 'visible'">{{ 'Visible'|t('grid') }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid__settings__show_in_input">
+                    <div class="field" v-show="breakpoint.notLaidOut === 'visible'">
+                        <div class="heading">
+                            <label>{{ 'Hide Layout'|t('grid') }}</label>
+                            <div class="instructions">
+                                <p>{{ 'Hide this layout from the field input.'|t('grid')|raw }}</p>
+                            </div>
+                        </div>
+                        <div class="btngroup">
+                            <div class="btn" :class="{ 'active': breakpoint.showInInput === 'hidden' }" @click="breakpoint.showInInput = 'hidden'">{{ 'Yes'|t('grid') }}</div>
+                            <div class="btn" :class="{ 'active': breakpoint.showInInput === 'visible' }" @click="breakpoint.showInInput = 'visible'">{{ 'No'|t('grid') }}</div>
                         </div>
                     </div>
                 </div>

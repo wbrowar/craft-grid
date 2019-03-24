@@ -25,7 +25,9 @@ class GridVariable
     // =========================================================================
 
     /**
-     * @param null $optional
+     * @param array $target
+     * @param array $grid
+     * @param array $args
      * @return string
      */
     public function value(array $target, array $grid, array $args=[])

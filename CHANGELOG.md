@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.0 - 2019-03-24
+### Added
+- Added optional classes that can be used for styling components based on where they are laid out in the grid.
+- When items in a layout are shown by default (setting Item Visibility to `Visible` in field settings), you may hide the layout from the input field so you don't have to move past it during content editing.
+
+### Changed
+- Changed the way field values are stored so they no longer need to be updated when a layout’s breakpoint changes
+  - This fixes an issue when saving field values into a project config
+  - **This runs a migration that should be run in all environments before changing any Grid field settings**
+
+### Fixed
+- Moved grid styles for the first layout into a `max-width` media query so it doesn’t need to be overridden by later breakpoints.
+
 ## 1.1.1 - 2019-02-14
 ### Fixed
 - Fixed a bug that occurred when adding a column in `auto` Column Mode

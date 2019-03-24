@@ -10,9 +10,8 @@
 
 namespace wbrowar\grid;
 
-use craft\elements\Entry;
 use craft\web\View;
-use wbrowar\grid\services\Grid as GridService;
+use wbrowar\grid\services\GridService;
 use wbrowar\grid\twigextensions\GridTwigExtension;
 use wbrowar\grid\variables\GridVariable;
 use wbrowar\grid\fields\Grid as GridField;
@@ -50,7 +49,7 @@ class Grid extends Plugin
     /**
      * @var string
      */
-    public $schemaVersion = '1.0.0';
+    public $schemaVersion = '1.2.0';
 
     // Public Methods
     // =========================================================================
@@ -90,14 +89,30 @@ class Grid extends Plugin
             }
         );
 
-        Craft::info(
-            Craft::t(
-                'grid',
-                '{name} plugin loaded',
-                ['name' => $this->name]
-            ),
-            __METHOD__
-        );
+        $this->log('Grid plugin loaded', 'info', __METHOD__);
+    }
+
+    /*
+     * Helper method used for logging to the Yii Debugger
+     */
+    public function log($message, $level, $category)
+    {
+        $message = Craft::t('grid', $message, ['name' => Grid::$plugin->name]);
+
+        switch ($level) {
+            case 'debug':
+                Craft::debug($message, $category);
+                break;
+            case 'error':
+                Craft::error($message, $category);
+                break;
+            case 'info':
+                Craft::info($message, $category);
+                break;
+            case 'warning':
+                Craft::warning($message, $category);
+                break;
+        }
     }
 
     // Protected Methods

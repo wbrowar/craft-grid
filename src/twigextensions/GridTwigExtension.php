@@ -41,10 +41,6 @@ class GridTwigExtension extends \Twig_Extension
     }
 
     /**
-     * Returns an array of Twig filters, used in Twig templates via:
-     *
-     *      {{ 'something' | someFilter }}
-     *
      * @return array
      */
     public function getTokenParsers()

@@ -15,6 +15,7 @@ use craft\helpers\StringHelper;
 
 use Craft;
 use craft\base\Component;
+use wbrowar\grid\Grid;
 
 /**
  * @author    Will Browar
@@ -53,24 +54,6 @@ class GridService extends Component
     }
 
     /*
-     * Check if all items in a target field have been laid out on a grid field
-     *
-     * @return mixed
-     */
-    public function getChildIsComplete(array $args)
-    {
-        $layouts = [];
-
-        if (!empty($args['field'])
-            && !empty($args['value'])) {
-            // coming soon
-            // @TODO check that all target items are liad out
-        }
-
-        return $layouts;
-    }
-
-    /*
      * Get all of the layouts (min-width) that a grid item is laid out for
      *
      * @return mixed
@@ -99,7 +82,7 @@ class GridService extends Component
     /*
      * Generates CSS for a grid field
      *
-     * @return string
+     * @return string|null
      */
     public function getGridCss(array $args)
     {
@@ -107,6 +90,7 @@ class GridService extends Component
             && !empty($args['selector'])
             && !empty($args['target'])
             && !empty($args['value'])) {
+            // Prepare defaults for arguments
             $unit = $args['unit'] ?? 'px';
 
             // BEGIN @supports
@@ -119,7 +103,6 @@ class GridService extends Component
                 if ($minWidth === 0) {
                     $css .= ' .' . $args['selector'] . ' {';
                     $css .= 'display: grid;';
-                    $css .= $this->_gridCssForBreakpoint($breakpoint);
                     $css .= '}';
 
                     if ($args['preview'] ?? false) {
@@ -133,8 +116,10 @@ class GridService extends Component
                     if ($maxWidth) {
                         $css .= ' @media (max-width: ' . $this->getCssSize($maxWidth, $unit) . ') {';
                     }
-//                    Craft::dd($breakpoint['notLaidOut']);
-                    $css .= $this->_gridItemCssForBreakpoint($args['target']['items'], $args['value']['id' . 0] ?? [], $args['selector'], $breakpoint['notLaidOut'] ?? 'hidden');
+                    $css .= ' .' . $args['selector'] . ' {';
+                    $css .= $this->_gridCssForBreakpoint($breakpoint);
+                    $css .= '}';
+                    $css .= $this->_gridItemCssForBreakpoint($breakpoint, $args['target']['items'], $args['value'][$breakpoint['id']] ?? [], $args['selector'], $breakpoint['notLaidOut'] ?? 'hidden');
                     if ($maxWidth) {
                         $css .= '}';
                     }
@@ -144,7 +129,7 @@ class GridService extends Component
                     $css .= ' .' . $args['selector'] . ' {';
                     $css .= $this->_gridCssForBreakpoint($breakpoint);
                     $css .= '}';
-                    $css .= $this->_gridItemCssForBreakpoint($args['target']['items'], $args['value']['id' . $minWidth] ?? [], $args['selector'], $breakpoint['notLaidOut'] ?? 'hidden');
+                    $css .= $this->_gridItemCssForBreakpoint($breakpoint, $args['target']['items'], $args['value'][$breakpoint['id']] ?? [], $args['selector'], $breakpoint['notLaidOut'] ?? 'hidden');
                     $css .= '}';
                 }
             }
@@ -209,9 +194,6 @@ class GridService extends Component
     /*
      * Get all info needed to construct grid from target field and grid field
      *
-     * $args can be populated with:
-     * unit | convert media query units to em or rem
-     *
      * @return string
      */
     public function getGridItemValue($item, array $grid, array $args=[]):array
@@ -222,7 +204,6 @@ class GridService extends Component
 
             return [
                 'content' => $item,
-    //            'isComplete' => $this->getChildLayouts(['field' => $gridField, 'id' => $item->id ?? null, 'value' => $gridValue]),
                 'layouts' => $this->getChildLayouts(['field' => $gridField, 'id' => $item->id ?? null, 'value' => $gridValue]),
             ];
         }
@@ -245,38 +226,6 @@ class GridService extends Component
         if (!empty($css)) {
             Craft::$app->getView()->registerCss($css);
         }
-    }
-
-    /*
-     * When a layout min-width is changed, find all elements that use the grid field and map the old layout values to the new layout
-     *
-     * @return bool
-     */
-    public function resaveElementForNewMinWidths(int $elementId, string $fieldHandle, array $newMinWidths)
-    {
-        $element = Craft::$app->getElements()->getElementById($elementId);
-        $fieldValue = $element->getFieldValue($fieldHandle);
-        $saveElement = false;
-
-        if ($fieldValue['value'] ?? false) {
-            foreach ($newMinWidths as $widthMap) {
-                if ($fieldValue['value']['id' . $widthMap['old']] ?? false) {
-                    $fieldValue['value']['id' . $widthMap['new']] = $fieldValue['value']['id' . $widthMap['old']];
-                    unset($fieldValue['value']['id' . $widthMap['old']]);
-                    $saveElement = true;
-                }
-            }
-        }
-
-        if ($saveElement) {
-            $updatedGridFields = [$fieldHandle => Json::encode($fieldValue)];
-            $element->setFieldValues($updatedGridFields);
-            $saved = Craft::$app->getElements()->saveElement($element);
-
-            return $saved;
-        }
-
-        return false;
     }
 
     // Twig Rendering Methods
@@ -423,6 +372,28 @@ class GridService extends Component
             if ($arguments['element'] ?? false) {
                 $this->_render['child']['element'] = $arguments['element'];
             }
+            if ($arguments['helperClasses'] ?? false) {
+                $helperClassSources = [];
+
+                if (is_array($arguments['helperClasses'])) {
+                    $helperClassSources = $arguments['helperClasses'];
+                } elseif (is_bool($arguments['helperClasses'])) {
+                    if ($arguments['helperClasses'] === true) {
+                        $helperClassSources = [
+                            'top',
+                            'bottom',
+                            'left',
+                            'right',
+                        ];
+                    }
+                }
+
+                $helperClasses = $this->_gridItemHelperClasses($this->_render['field']['target']['items'][$index], $this->_render['field']['field'], $this->_render['field']['value'], $helperClassSources, $this->_render['parent']['selector'], $index);
+                
+                if ($helperClasses ?? false) {
+                    $classes .= ' ' . $helperClasses;
+                }
+            }
         }
 
         $selector = $this->_gridItemSelector($this->_render['parent']['selector'], $index);
@@ -431,7 +402,7 @@ class GridService extends Component
             $classes .= ' ' . $this->_render['parent']['selector'] . '__preview';
         }
 
-        return '<' . $this->_render['child']['element'] . ' class="' . $selector . (!empty($classes) ? ' ' . $classes : '') . '"' . (!empty($attributes) ? ' ' . $attributes : '') . '>';
+        return '<' . $this->_render['child']['element'] . ' class="' . $selector . (!empty($classes) ? ' ' . trim($classes) : '') . '"' . (!empty($attributes) ? ' ' . $attributes : '') . '>';
     }
 
     /*
@@ -456,7 +427,7 @@ class GridService extends Component
     /*
      * @return string
      */
-    private function _gridCssForBreakpoint($breakpoint)
+    private function _gridCssForBreakpoint($breakpoint):string
     {
         $css = '';
         switch ($breakpoint['modeColumns']) {
@@ -481,7 +452,7 @@ class GridService extends Component
     /*
      * @return string
      */
-    private function _gridItemCssForBreakpoint($items, $value, $selector, $notLaidOut)
+    private function _gridItemCssForBreakpoint($breakpoint, $items, $value, $selector, $notLaidOut):string 
     {
         $css = '';
         for ($i=0; $i<count($items); $i++) {
@@ -489,6 +460,7 @@ class GridService extends Component
             if (!empty($value['id' . $items[$i]['id']]) && $items[$i]['status'] === 'enabled') {
                 $item = $value['id' . $items[$i]['id']];
                 $css .= $itemSelector . ' {';
+                    // Set grid position
                     $css .= 'grid-column: ' . $item['columnStart'] . ' / ' . $item['columnEnd'] . ';';
                     $css .= 'grid-row: ' . $item['rowStart'] . ' / ' . $item['rowEnd'] . ';';
                 $css .= '}';
@@ -506,9 +478,69 @@ class GridService extends Component
     /*
      * @return string
      */
-    private function _gridSelector($fieldHandle, $targetHandle):string
+    private function _gridItemHelperClasses($gridItem, $gridField, $gridValue, $helperClasses, $gridSelector):string
     {
-        return 'grid__' . StringHelper::toSnakeCase($fieldHandle) . '__' . StringHelper::toSnakeCase($targetHandle);
+        $classes = '';
+
+        foreach ($gridField['layout']['breakpoints'] as $breakpoint) {
+            foreach ($helperClasses as $source) {
+                // Check to see if the grid item is laid out for this breakpoint
+                if ($gridValue[$breakpoint['id']]['id' . $gridItem['id']] ?? false) {
+                    switch ($source) {
+                        case 'top':
+                            if ($gridValue[$breakpoint['id']]['id' . $gridItem['id']]['rowStart'] == 1) {
+                                $classes .= ' ' . $gridSelector . '--top--' . $breakpoint['minWidth'];
+                            }
+                            break;
+                        case 'bottom':
+                            $addClass = false;
+                            if (($breakpoint['modeRows'] == 'fixed' && $gridValue[$breakpoint['id']]['id' . $gridItem['id']]['rowEnd'] == (count($breakpoint['rows']) + 1))) {
+                                $addClass = true;
+                            } elseif ($breakpoint['modeRows'] == 'auto') {
+                                $max = 1;
+                                foreach ($gridValue[$breakpoint['id']] as $item) {
+                                    if ($item['rowEnd'] > $max) {
+                                        $max = $item['rowEnd'];
+                                    }
+                                }
+                                if ($gridValue[$breakpoint['id']]['id' . $gridItem['id']]['rowEnd'] == $max) {
+                                    $addClass = true;
+                                }
+                            }
+                            if ($addClass) {
+                                $classes .= ' ' . $gridSelector . '--bottom--' . $breakpoint['minWidth'];
+                            }
+                            break;
+                        case 'left':
+                            if ($gridValue[$breakpoint['id']]['id' . $gridItem['id']]['columnStart'] == 1) {
+                                $classes .= ' ' . $gridSelector . '--left--' . $breakpoint['minWidth'];
+                            }
+                            break;
+                        case 'right':
+                            $addClass = false;
+                            if (($breakpoint['modeColumns'] == 'fixed' && $gridValue[$breakpoint['id']]['id' . $gridItem['id']]['columnEnd'] == (count($breakpoint['columns']) + 1))) {
+                                $addClass = true;
+                            } elseif ($breakpoint['modeColumns'] == 'auto') {
+                                $max = 1;
+                                foreach ($gridValue[$breakpoint['id']] as $item) {
+                                    if ($item['columnEnd'] > $max) {
+                                        $max = $item['columnEnd'];
+                                    }
+                                }
+                                if ($gridValue[$breakpoint['id']]['id' . $gridItem['id']]['columnEnd'] == $max) {
+                                    $addClass = true;
+                                }
+                            }
+                            if ($addClass) {
+                                $classes .= ' ' . $gridSelector . '--right--' . $breakpoint['minWidth'];
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+
+        return $classes;
     }
 
     /*
@@ -517,5 +549,13 @@ class GridService extends Component
     private function _gridItemSelector($gridSelector, $index):string
     {
         return $gridSelector . '__item--' . $index;
+    }
+
+    /*
+     * @return string
+     */
+    private function _gridSelector($fieldHandle, $targetHandle):string
+    {
+        return 'grid__' . StringHelper::toSnakeCase($fieldHandle) . '__' . StringHelper::toSnakeCase($targetHandle);
     }
 }
