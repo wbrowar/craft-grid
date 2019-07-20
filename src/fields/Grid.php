@@ -10,7 +10,7 @@
 
 namespace wbrowar\grid\fields;
 
-use wbrowar\grid\Grid as GridPlugin;
+use craft\helpers\ElementHelper;
 use wbrowar\grid\assetbundles\grid\GridAsset;
 use wbrowar\grid\assetbundles\gridfield\GridFieldAsset;
 
@@ -45,6 +45,13 @@ class Grid extends Field
      */
     public $targetFieldId = '';
 
+    /**
+     * Temporary list of the ids of the Target Value Items
+     *
+     * @var array
+     */
+    public $onSaveTargetItems = [];
+
     // Static Methods
     // =========================================================================
 
@@ -74,90 +81,19 @@ class Grid extends Field
     /**
      * @inheritdoc
      */
-    public function afterSave(bool $isNew)
+    public function beforeElementSave(ElementInterface $element, bool $isNew): bool
     {
-        parent::afterSave($isNew);
+        $this->_updateOnSaveTargetItems($element);
+        
+        return parent::beforeElementSave($element, $isNew);
     }
 
     /**
      * @inheritdoc
      */
-    public function afterElementSave(ElementInterface $element, bool $isNew)
+    public function afterElementPropagate(ElementInterface $element, bool $isNew)
     {
-        $updatedGridFields = [];
-
-        $fieldHandle = $this->handle;
-        $fieldValue = $element->getFieldValue($fieldHandle);
-
-        // Re-save fields that use newX when adding content
-        if ($fieldValue['target'] ?? false) {
-            if ($fieldValue['target']['id'] !== '__none__') {
-                $targetFieldId = $fieldValue['target']['id'];
-                $targetField = Craft::$app->getFields()->getFieldById($targetFieldId);
-                if ($element['ownerId'] ?? false) {
-                    $targetElement = Craft::$app->getElements()->getElementById($element['ownerId']);
-                } else {
-                    $targetElement = $element;
-                }
-
-                $targetValue = $targetElement->getFieldValue($targetField->handle);
-
-                switch ($targetValue->elementType) {
-                    case 'craft\\elements\\MatrixBlock':
-                        if ($fieldValue['target']['items'] ?? false) {
-                            // Store all block IDs
-                            $targetValueIds = [];
-                            foreach ($targetValue->all() as $block) {
-                                $targetValueIds[] = strval($block->id);
-                            }
-
-                            // Map all newX IDs
-                            $fieldTargetItemIds = [];
-                            for ($j=0; $j<count($fieldValue['target']['items']); $j++) {
-                                // Store ID
-                                $fieldTargetItemIds[] = strval($fieldValue['target']['items'][$j]['id']);
-                            }
-
-                            // Map all newX IDs to their new IDs
-                            $xToId = [];
-                            for ($j=0; $j<count($fieldTargetItemIds); $j++) {
-                                if (substr($fieldTargetItemIds[$j], 0, 3) == 'new') {
-                                    $xToId['id' . $fieldTargetItemIds[$j]] = 'id' . $targetValueIds[$j];
-                                }
-                            }
-
-                            if (count(array_keys($xToId)) > 0) {
-                                // Iterate through field value and replace newX IDs with new ID
-                                foreach ($fieldValue['value'] as &$breakpoint) {
-                                    // Copy each of the items that need to be replaced
-                                    foreach (array_keys($breakpoint) as $item) {
-                                        if ($xToId[$item] ?? false) {
-                                            $breakpoint[$xToId[$item]] = $breakpoint[$item];
-    //                                                unset($breakpoint[$item]);
-                                        }
-                                    }
-                                }
-                                // Iterate through target and replace newX IDs with new ID
-                                for ($j=0; $j<count($fieldValue['target']['items']); $j++) {
-                                    if (substr($fieldValue['target']['items'][$j]['id'], 0, 3) == 'new') {
-                                        $fieldValue['target']['items'][$j]['id'] = intval(substr($xToId['id' . $fieldValue['target']['items'][$j]['id']], 2));
-                                    }
-                                }
-
-                                $updatedGridFields[$fieldHandle] = Json::encode($fieldValue);
-                            }
-                        }
-                        break;
-                }
-
-                if (!empty($updatedGridFields)) {
-                    $element->setFieldValues($updatedGridFields);
-                    Craft::$app->getElements()->saveElement($element);
-                }
-            }
-        }
-
-        parent::afterElementSave($element, $isNew);
+        $this->_updateTargetIds($element);
     }
 
     /**
@@ -216,8 +152,9 @@ class Grid extends Field
             'target' => $target,
             'value' => $value,
         ];
+
         $jsonVars = Json::encode($jsonVars);
-        Craft::$app->getView()->registerJs("$('#{$namespacedId}-field').GridField(" . $jsonVars . ");");
+        Craft::$app->getView()->registerJs("$('#" . $namespacedId . "-field').GridField(" . $jsonVars . ");");
 
         // Render the input template
         return Craft::$app->getView()->renderTemplate(
@@ -267,29 +204,89 @@ class Grid extends Field
         // Get value for grid field
         if (is_string($value) && !empty($value)) {
             $value = Json::decodeIfJson($value);
-
-            if (!is_array($value)) {
-                $value = [];
-            }
-
-            // Set field information
-            $value['field'] = [
-                'handle' => $this->handle,
-                'layout' => Json::decodeIfJson($this->layout),
-            ];
-
-            return $value;
         }
 
-        GridPlugin::$plugin->log('Cannot get value from Grid field: ' . $this->handle . ' in element: ' . $element->getId(), 'error', __METHOD__);
-        return 'error';
+        if (empty($value)) {
+            $value = [];
+        }
+
+        // Set field information
+        $value['field'] = [
+            'handle' => $this->handle,
+            'layout' => Json::decodeIfJson($this->layout),
+        ];
+
+        return $value;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function serializeValue($value, ElementInterface $element = null)
+
+    private function _updateOnSaveTargetItems($element)
     {
-        return parent::serializeValue($value, $element);
+        $this->onSaveTargetItems = [];
+
+        $fieldHandle = $this->handle;
+        $fieldValue = $element->getFieldValue($fieldHandle);
+
+        if ($fieldValue['target'] ?? false) {
+            if ($fieldValue['target']['id'] !== '__none__') {
+                $targetFieldId = $fieldValue['target']['id'];
+                $targetField = Craft::$app->getFields()->getFieldById($targetFieldId);
+                $targetElement = ElementHelper::rootElement($element);
+                $targetValue = $targetElement->getFieldValue($targetField->handle);
+
+                foreach ($targetValue->all() as $item) {
+                    $this->onSaveTargetItems[] = $item['id'] ?? '__no_id__';
+                }
+            }
+        }
+    }
+    private function _updateTargetIds($element)
+    {
+        $fieldHandle = $this->handle;
+        $fieldValue = $element->getFieldValue($fieldHandle);
+
+        // Re-save fields that use newX when adding content
+        if ($fieldValue['target'] ?? false) {
+            if ($fieldValue['target']['id'] !== '__none__' && count($this->onSaveTargetItems) > 0) {
+                $saveElement = false;
+
+                $targetFieldId = $fieldValue['target']['id'];
+                $targetField = Craft::$app->getFields()->getFieldById($targetFieldId);
+                $targetElement = ElementHelper::rootElement($element);
+                $targetValue = $targetElement->getFieldValue($targetField->handle);
+
+                $currentIds = [];
+                foreach ($targetValue->all() as $item) {
+                    if ($item['id'] ?? false) {
+                        $currentIds[] = $item['id'] ?? '__no_id__';
+                    }
+                }
+
+                // Replace old ids with new ids
+                if ($fieldValue['target']['items'] ?? false) {
+                    for ($i=0; $i<count($this->onSaveTargetItems); $i++) {
+                        if ($this->onSaveTargetItems[$i] != $currentIds[$i]) {
+                            $saveElement = true;
+
+                            // Replace value ID on all breakpoints
+                            foreach ($fieldValue['value'] as &$breakpoint) {
+                                if ($breakpoint['id' . $fieldValue['target']['items'][$i]['id']] ?? false) {
+                                    $breakpoint['id' . $currentIds[$i]] = $breakpoint['id' . $fieldValue['target']['items'][$i]['id']];
+                                    unset($breakpoint['id' . $fieldValue['target']['items'][$i]['id']]);
+                                }
+                            }
+
+                            // Replace target item ID
+                            $fieldValue['target']['items'][$i]['id'] = $currentIds[$i];
+                        }
+                    }
+                }
+
+                if ($saveElement) {
+                    $element->setFieldValues([$fieldHandle => Json::encode($fieldValue)]);
+                    Craft::$app->getElements()->saveElement($element);
+                }
+            }
+        }
     }
 }

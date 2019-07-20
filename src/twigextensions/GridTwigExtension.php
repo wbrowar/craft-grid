@@ -13,6 +13,7 @@ namespace wbrowar\grid\twigextensions;
 use wbrowar\grid\Grid;
 
 use Craft;
+use Twig\Extension\AbstractExtension;
 
 /**
  * Twig can be extended in many ways; you can add extra tags, filters, tests, operators,
@@ -25,7 +26,7 @@ use Craft;
  * @package   Grid
  * @since     1.0.0
  */
-class GridTwigExtension extends \Twig_Extension
+class GridTwigExtension extends AbstractExtension
 {
     // Public Methods
     // =========================================================================

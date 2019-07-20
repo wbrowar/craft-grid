@@ -13,13 +13,14 @@ namespace wbrowar\grid\twigextensions;
 use wbrowar\grid\Grid;
 
 use wbrowar\grid\twigextensions\GridNode;
+use Twig\TokenParser\AbstractTokenParser;
 
 /**
  * @author    Will Browar
  * @package   Grid
  * @since     1.0.0
  */
-class GridTokenParser extends \Twig_TokenParser
+class GridTokenParser extends AbstractTokenParser
 {
     // Public Methods
     // =========================================================================

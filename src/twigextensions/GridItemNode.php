@@ -12,12 +12,14 @@ namespace wbrowar\grid\twigextensions;
 
 use wbrowar\grid\Grid;
 
+use Twig\Node\Node;
+
 /**
  * @author    Will Browar
  * @package   Grid
  * @since     1.0.0
  */
-class GridItemNode extends \Twig_Node
+class GridItemNode extends Node
 {
     // Public Methods
     // =========================================================================
