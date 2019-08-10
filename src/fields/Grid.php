@@ -150,7 +150,7 @@ class Grid extends Field
                 'layout' => Json::decodeIfJson($this->layout),
             ],
             'target' => $target,
-            'value' => $value,
+            'value' => $this->_getInputValue($element, $target, $value),
         ];
 
         $jsonVars = Json::encode($jsonVars);
@@ -220,6 +220,46 @@ class Grid extends Field
     }
 
 
+    private function _getInputValue(ElementInterface $element, $target, $value)
+    {
+        if ($target['class'] == 'craft\\fields\\Matrix') {
+            // Get IDs of matrix blocks
+            $targetValue = $element->getFieldValue($target['handle']);
+            $targetIds = $targetValue->ids();
+
+            // Get IDs from grid field layout and compare them to matrix block IDs
+            $unmatchedIds = [];
+            if (($value['target'] ?? false) && ($value['target']['items'] ?? false)) {
+                for ($i=0; $i<count($value['target']['items']); $i++) {
+                    $targetId = intval($targetIds[$i]);
+                    $valueId = $value['target']['items'][$i]['id'];
+
+                    if ($targetId != $valueId) {
+                        $unmatchedIds[] = [
+                            'target' => $targetId,
+                            'value' => $valueId,
+                        ];
+                        $value['target']['items'][$i]['id'] = $targetId;
+                    }
+                }
+
+                // Loop through grid values and change IDs if needed
+                if (!empty($unmatchedIds) && $value['value']) {
+                    foreach ($value['value'] as &$breakpoint) {
+                        foreach ($unmatchedIds as $id) {
+                            if ($breakpoint['id' . $id['value']] ?? false) {
+                                $breakpoint['id' . $id['target']] = $breakpoint['id' . $id['value']];
+                                unset($breakpoint['id' . $id['value']]);
+                            }
+                        }
+                    }
+                }
+            }
+//            Craft::dd($value);
+        }
+
+        return $value;
+    }
     private function _updateOnSaveTargetItems($element)
     {
         $this->onSaveTargetItems = [];

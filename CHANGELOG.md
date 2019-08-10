@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## 1.2.1 - 2019-07-20
-> {warning} This release fixes an issue when saving grid fields in Craft 3.2, however, there is still a bug related to creating and saving a draft in Craft 3.2+. The fix for this will be completed for the next release of Grid. In the mean time, drafts may be reverted to the current or a previous revision if grid data is lost when saving a draft.
+## 1.2.2 - 2019-08-10
+### Fixed
+- Fixed an issue that occurred in Craft 3.2 when saving a grid field that has a matrix field for its target field as a draft.
 
+## 1.2.1 - 2019-07-20
 ### Changed
 - Raised the minimum version of Craft CMS to `^3.2.5`.
 - Updated deprecated Twig Extension classes.
