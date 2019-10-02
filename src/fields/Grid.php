@@ -84,7 +84,7 @@ class Grid extends Field
     public function beforeElementSave(ElementInterface $element, bool $isNew): bool
     {
         $this->_updateOnSaveTargetItems($element);
-        
+
         return parent::beforeElementSave($element, $isNew);
     }
 
@@ -231,6 +231,7 @@ class Grid extends Field
             $unmatchedIds = [];
             if (($value['target'] ?? false) && ($value['target']['items'] ?? false)) {
                 for ($i=0; $i<count($value['target']['items']); $i++) {
+                  if (!empty($targetIds[$i])) {
                     $targetId = intval($targetIds[$i]);
                     $valueId = $value['target']['items'][$i]['id'];
 
@@ -241,6 +242,7 @@ class Grid extends Field
                         ];
                         $value['target']['items'][$i]['id'] = $targetId;
                     }
+                  }
                 }
 
                 // Loop through grid values and change IDs if needed
@@ -310,10 +312,12 @@ class Grid extends Field
 
                             // Replace value ID on all breakpoints
                             foreach ($fieldValue['value'] as &$breakpoint) {
+                              if (!empty($fieldValue['target']['items'][$i])) {
                                 if ($breakpoint['id' . $fieldValue['target']['items'][$i]['id']] ?? false) {
                                     $breakpoint['id' . $currentIds[$i]] = $breakpoint['id' . $fieldValue['target']['items'][$i]['id']];
                                     unset($breakpoint['id' . $fieldValue['target']['items'][$i]['id']]);
                                 }
+                              }
                             }
 
                             // Replace target item ID
