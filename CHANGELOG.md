@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.3 - 2019-10-06
+### Added
+- Added EOL notice to README.
+
+### Fixed
+- Added a check for unused matrix blocks ([11](https://github.com/wbrowar/craft-grid/issues/11)). Thanks to @Geestig for the fix.
+
 ## 1.2.2 - 2019-08-10
 ### Fixed
 - Fixed an issue that occurred in Craft 3.2 when saving a grid field that has a matrix field for its target field as a draft.

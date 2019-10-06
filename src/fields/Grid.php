@@ -231,15 +231,17 @@ class Grid extends Field
             $unmatchedIds = [];
             if (($value['target'] ?? false) && ($value['target']['items'] ?? false)) {
                 for ($i=0; $i<count($value['target']['items']); $i++) {
-                    $targetId = intval($targetIds[$i]);
-                    $valueId = $value['target']['items'][$i]['id'];
+                    if (!empty($targetIds[$i])) {
+                        $targetId = intval($targetIds[$i]);
+                        $valueId = $value['target']['items'][$i]['id'];
 
-                    if ($targetId != $valueId) {
-                        $unmatchedIds[] = [
-                            'target' => $targetId,
-                            'value' => $valueId,
-                        ];
-                        $value['target']['items'][$i]['id'] = $targetId;
+                        if ($targetId != $valueId) {
+                            $unmatchedIds[] = [
+                                'target' => $targetId,
+                                'value' => $valueId,
+                            ];
+                            $value['target']['items'][$i]['id'] = $targetId;
+                        }
                     }
                 }
 
@@ -305,19 +307,23 @@ class Grid extends Field
                 // Replace old ids with new ids
                 if ($fieldValue['target']['items'] ?? false) {
                     for ($i=0; $i<count($this->onSaveTargetItems); $i++) {
-                        if ($this->onSaveTargetItems[$i] != $currentIds[$i]) {
-                            $saveElement = true;
+                        if (($this->onSaveTargetItems[$i] ?? false) && ($currentIds[$i] ?? false)) {
+                            if ($this->onSaveTargetItems[$i] != $currentIds[$i]) {
+                                $saveElement = true;
 
-                            // Replace value ID on all breakpoints
-                            foreach ($fieldValue['value'] as &$breakpoint) {
-                                if ($breakpoint['id' . $fieldValue['target']['items'][$i]['id']] ?? false) {
-                                    $breakpoint['id' . $currentIds[$i]] = $breakpoint['id' . $fieldValue['target']['items'][$i]['id']];
-                                    unset($breakpoint['id' . $fieldValue['target']['items'][$i]['id']]);
+                                // Replace value ID on all breakpoints
+                                foreach ($fieldValue['value'] as &$breakpoint) {
+                                    if (!empty($fieldValue['target']['items'][$i])) {
+                                        if ($breakpoint['id'.$fieldValue['target']['items'][$i]['id']] ?? false) {
+                                            $breakpoint['id'.$currentIds[$i]] = $breakpoint['id'.$fieldValue['target']['items'][$i]['id']];
+                                            unset($breakpoint['id'.$fieldValue['target']['items'][$i]['id']]);
+                                        }
+                                    }
                                 }
-                            }
 
-                            // Replace target item ID
-                            $fieldValue['target']['items'][$i]['id'] = $currentIds[$i];
+                                // Replace target item ID
+                                $fieldValue['target']['items'][$i]['id'] = $currentIds[$i];
+                            }
                         }
                     }
                 }

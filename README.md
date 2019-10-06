@@ -6,6 +6,8 @@ A field that lets you content manage CSS Grid in Craft CMS.
 
 *Note: The license fee for this plugin is $49.00 via the [Craft Plugin Store](https://plugins.craftcms.com/grid).*
 
+*As of Oct. 2019: Grid will not be ported to Craft 4. Grid will be supported for Craft 3.x until Craft 3 EOL.*
+
 ## Requirements
 
 This plugin requires Craft CMS 3.1.7 or later.
