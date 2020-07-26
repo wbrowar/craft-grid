@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.4 - 2020-07-26
+### Added
+- When a target field is set to a matrix field, labels on the preview grid reflect the initial values of text-based fields in each matrix block.
+
+### Changed
+- Grid now requires Craft 3.5+
+- The items list in a Grid field is now sticky (thanks to @Geestig) [#17](https://github.com/wbrowar/craft-grid/issues/17)
+
+### Fixed
+- Compatibility fixes for Craft 3.5
+- Fixed issue where target items displayed the wrong title in input preview grids
+
+
 ## 1.2.3 - 2019-10-06
 ### Added
 - Added EOL notice to README.
@@ -11,9 +24,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 - Added a check for unused matrix blocks ([11](https://github.com/wbrowar/craft-grid/issues/11)). Thanks to @Geestig for the fix.
 
+
 ## 1.2.2 - 2019-08-10
 ### Fixed
 - Fixed an issue that occurred in Craft 3.2 when saving a grid field that has a matrix field for its target field as a draft.
+
 
 ## 1.2.1 - 2019-07-20
 ### Changed
@@ -22,6 +37,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Fixed
 - Fixed an issue where grid fields were mismatching the IDs of target ID items.
+
 
 ## 1.2.0 - 2019-03-24
 ### Added
@@ -36,9 +52,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 - Moved grid styles for the first layout into a `max-width` media query so it doesn’t need to be overridden by later breakpoints.
 
+
 ## 1.1.1 - 2019-02-14
 ### Fixed
 - Fixed a bug that occurred when adding a column in `auto` Column Mode
+
 
 ## 1.1.0 - 2019-02-10
 ### Added
@@ -54,9 +72,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 - Added the correct prefix to let Grid fields be editable in the element editor (the popup that appears when you double-click an element)
 
+
 ## 1.0.1 - 2019-02-08
 ### Fixed
 - Fixed a couple of errors that occur when no grid layout has been set before render
+
 
 ## 1.0.0 - 2019-02-05
 ### Added
@@ -72,6 +92,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
   
 I‘m taking the [BETA] flag off and releasing this as 1.0.0! I‘ll keep a close eye on any issues that pop up, so please send any feedback or issues: https://github.com/wbrowar/craft-grid/issues
 
+
 ## 1.0.0-beta.3 - 2019-02-04
 ### Added
 - Added support for Craft Commerce fields, Products and Variants
@@ -79,17 +100,20 @@ I‘m taking the [BETA] flag off and releasing this as 1.0.0! I‘ll keep a clos
 ### Fixed
 - Fixed a bug that prevented creating a new layout
 
+
 ## 1.0.0-beta.2 - 2019-02-03
 ### Fixed
 - Fixed a bug that prevented creating a new grid field
 - Fixed a bug that lets someone put in a negative or empty layout breakpoint
 - Corrected links to docs and readme in composer.json
 
+
 ## 1.0.0-beta.1 - 2019-02-03
 ### Added
 - Grid fields can now be used in Matrix fields to create multiple layouts for a target field
 - Added mobile layout for settings and field input
 - Grid now resaves all elements when a layout breakpoint changes in field settings
+
 
 ## 1.0.0-beta.0 - 2019-02-02
 ### Added
